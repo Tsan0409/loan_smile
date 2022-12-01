@@ -1,0 +1,517 @@
+/* バランスの調整 */
+html {
+    height: 100%;
+    font-size: 100%;
+}
+
+body {
+    background: #E0D5CA;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+header {
+    width: 100%;
+}
+
+footer {
+    position: sticky;
+    top: 100vh;
+    width: 100%;
+}
+
+.container {
+    min-height: 100vh;
+}
+
+/* ハンバーガー */
+
+#nav {
+    background-color: #053177;
+    width: 270px;
+    height: 100%;
+    position: fixed;
+    right: -270px;
+    top: 0;;
+}
+
+.hamburger-menu {
+    text-align: center;
+    color: #E0D5CA;
+}
+
+#nav h3 {
+    font-size: 1.5rem;
+    padding-top: 1.8rem;
+}
+
+#nav ul {
+    max-width: 95%;
+    margin: 0.8rem auto;
+}
+
+.hamburger-menu li {
+    padding: 1.5rem;
+    border-bottom: 2px solid #E0D5CA
+}
+
+#nav h4 {
+    font-size: 1rem;
+    padding:0rem 0.5rem 0.5rem;
+}
+
+
+.hidden_list li {
+    padding: 1rem;
+    border: #053177;
+
+
+}
+
+#nav a:hover {
+    text-decoration: underline;
+}
+
+#wrapper, #nav {
+    transition: transform 0.3s;
+}
+
+.show {
+    transform: translate3d(-270px, 0, 0);
+}
+
+
+
+
+
+/* ヘッダー */
+#menu {
+    background: #053177;
+}
+
+.main-menu {
+    display: flex;
+    justify-content: center;
+}
+
+.menu-logo {
+    width:120px;
+    margin-top: 14px;
+    padding-left: 14px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.main-menu a {
+    padding: 1rem;
+    color: #D9D5BE;
+    display: inline-block;
+    margin-top: 1rem;
+    margin-right: 0.1rem;
+    margin-left: 0.1rem;
+    margin-bottom: 0.5rem;}
+
+.main-menu li {
+    font-size:1rem;
+    font-family: 'Antonio', sans-serif;
+    font-weight: 200;
+    line-height: 1;
+    position: relative;
+    text-align:center;
+}
+
+.main-menu a:hover {
+    text-decoration: underline;
+}
+
+.sub-menu {
+    position: absolute;
+    top: 3.5rem;}
+
+.sub-menu a {
+    font-size: 0.85rem;
+    background: #053177;
+    color: #D9D5BE;
+    padding: 17px;
+    margin: 0;
+    width: 160px;
+    text-align: left;
+}
+
+.has-menu {
+    position: relative;
+}
+
+.has-menu .sub-menu {
+    display: none;
+}
+
+.has-menu:hover .sub-menu {
+    display: block;
+}
+
+.hamburger {
+    display: none;
+}
+
+
+
+
+/* ホームページ */
+.main-page {
+    text-align: center;
+    height: 100%;
+}
+
+.main-logo {
+    width: 375px;
+    display: flex;
+    margin:  140px auto 150px;
+}
+
+.subject-display{
+    display: flex;
+    justify-content: space-around;
+}
+
+.subject {
+    display:flex;
+    flex-direction: column;
+    font-size: 1.8rem;
+    color: #053177;
+    margin-bottom: 8px;
+}
+
+.contents {
+    font-size: 1rem;
+    color: #E39210;
+    text-align: left;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.contents a {
+    font-size: 1.5rem;
+    padding:5px 0 5px;
+}
+.contents a:hover {
+    text-decoration: underline;
+}
+
+
+
+
+/* コンテンツページ */
+.content-head {
+    font-size: 2.2rem;
+    color: #053177;
+    margin-bottom: 8px;
+    margin: 2rem auto 1rem;
+}
+
+.contents-ex {
+    font-size: 1rem;
+    color: #E39210;
+}
+
+
+table {
+
+    color: #053177;
+    margin:1rem auto 1rem;
+    width:100%;
+    text-align: center;
+    }
+
+th {
+    width:40%;
+    text-align: right;
+    vertical-align: middle;
+    padding: 1rem 2rem;
+    margin: 1rem 5rem;
+    display: inline-block;
+    display: table-cell;
+}
+
+td {
+    vertical-align: middle;
+    text-align: left;
+    padding: 1rem 2rem;
+    }
+
+.big-table {
+    display: flex;
+    justify-content: space-around;
+    margin: 2rem auto 3.5rem;
+}
+
+.table-head {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #96a8c6;
+    width: auto;
+    font-size: 0.9rem;
+    text-align: left;
+    vertical-align: middle;
+    padding: auto;
+}
+
+.table-data {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #96a8c6;
+    text-align: left;
+    padding: auto;
+}
+
+
+
+
+
+.message {
+    text-align: center;
+    color: red;
+}
+
+
+/* フォーム */
+.form-text {
+    width: 60%;
+    height:     1.5rem;
+    background: white;
+    margin-right:0.25rem;
+}
+
+.form-text:focus {
+    outline: 0;
+    box-shadow: 0 0 0 2px rgb(33, 150, 243) inset;
+}
+
+.select-radio {
+    display: flex;
+    width:70%;
+    justify-content:space-between;
+}
+
+.radio-text {
+margin-right: 2rem;;
+}
+
+
+.answer {
+    font-size: 2.5rem;
+    color:#E39210;
+}
+
+
+/* ボタン */
+
+button {
+    color:#D9D5BE;
+    background:#053177;
+    padding:0.5rem;
+    margin: 0.5rem auto;
+    width: 10rem;
+    pointer-events: auto;
+}
+
+button:hover {
+    background:#0c65f5;
+}
+
+/* 戻るボタン */
+.back {
+    color: #053177;
+}
+
+.back:hover {
+    text-decoration: underline;
+}
+
+
+
+/* フッター*/
+footer {
+    text-align: center;
+    background: #053177;
+    padding: 1.5rem;}
+
+footer a {
+    color: #D9D5BE;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* 隠し */
+.hidden {
+    display: none;
+}
+
+
+
+
+
+
+@media (max-width: 600px) {
+
+
+/* layout（画面パンパンにしない）*/
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+/* ヘッダー */
+
+#menu {
+    height: 80px;
+    width: 100%;
+}
+
+.main-menu {
+    display: none;
+}
+
+
+.hamburger {
+    display: contents;
+    /* width: 20px; */
+}
+
+.hamburger img {
+    width: 40px;
+    height: 40px;
+    margin: 14px;
+}
+
+/* インデックスページ */
+.subject-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.contents {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+
+.contents a {
+    /* display: none; */
+}
+
+
+/* テーブル縦並び */
+.form table {
+    width: 100%;
+}
+
+.form th, .form td {
+    display: block;
+    width: 100%;
+}
+
+
+.form th {
+    text-align: left;
+    width:80%;
+    padding: 0.5rem 0.5rem 0.5rem 10%;
+    margin: 0.5rem auto ;
+
+}
+
+.form td {
+    width: 80%;
+    vertical-align: middle;
+    text-align: left;
+    padding: 0.5rem 0.5rem 0.5rem 10%;
+    margin: 0.5rem auto;
+    }
+
+.form-text {
+    min-width: 200px;
+
+}
+
+.no-head {
+    display: none;
+}
+
+
+
+/* ラジオボタン */
+
+.select-radio {
+    display: flex;
+    justify-content:space-between;
+}
+
+.radio_label {
+    margin-bottom: 0.5rem;
+
+}
+
+.radio_form {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* テーブル操作 */
+
+  .big-table {
+    width: 80%;
+  }
+
+  .table-head {
+    display:none;
+  }
+
+
+  .big-table tr {
+    width: 100%;
+  }
+
+
+  .big-table td {
+    display: block;
+    text-align: right;
+    width: 100%;
+  }
+  .big-table td:first-child {
+    background: #053177;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+  }
+  .big-table td:before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+
+/* グラフ画像 */
+.graph img {
+    width: 375px;
+    margin: 1rem auto;
+
+}
+
+
+
+}

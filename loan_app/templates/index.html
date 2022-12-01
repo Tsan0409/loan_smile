@@ -1,10 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-あああ
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contents %}
+
+<section class="main-page">
+    <div class="container">
+        <img src="{% static '/assets/smile_navi_tr.png' %}"  class="main-logo">
+        <div class="subject-display">
+            <div class="contents">
+            <h1 class="subject">計算</h1>
+                <a href="/borrowable/form">借入可能額</a>
+                <a href="/required_income/form">借入に必要な年収</a>
+                <a href="/repaid/form">月々の支払い</a>
+                <a href="/sample">サンプル</a>
+            </div>
+            <div class="contents">
+                <h1 class="subject">住宅ローン情報</h1>
+                    <a href="">金利一覧</a>
+                    <a href="/upload/form">ローン情報の追加</a>
+                    <a href="/change_info/form">ローン情報の変更</a>
+            </div>
+            <div class="contents">
+                    <h1 class="subject">アカウント情報</h1>
+                    <a name="logout" class="logout" href="/register">アカウントの作成</a>
+                    <a name="logout" class="logout" href="/login">ログイン</a>
+                    <a name="login" class="login" href="/logout">ログアウト</a>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

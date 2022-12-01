@@ -1,0 +1,143 @@
+{% load static %}
+
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--de_style-->
+    <link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css">
+<!--    Google Fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Antonio&family=M+PLUS+1p:wght@300&display=swap" rel="stylesheet">
+<!--    css file-->
+    <link rel="stylesheet"  href="{% static 'css/style.css' %}">
+    <title>loan_app</title>
+</head>
+
+<body>
+
+<div id="wrapper">
+
+<header>
+    <!--サイドメニュー-->
+    <div id="menu">
+            <div class="header">
+                <h2><img src="{% static '/assets/smile_va_tr.png' %}" alt="" class="menu-logo"></h2>
+                <ul class="main-menu">
+                    <li><a href="/">ホーム</a></li>
+                    <li class="has-menu"><a href="#">計算</a>
+                        <ul class="sub-menu">
+                            <li><a href="/borrowable/form">借入可能額</a></li>
+                            <li><a href="/required_income/form">必要な年収</a></li>
+                            <li><a href="/repaid/form">支払い</a></li>
+                            <li><a href="">繰上げ返済</a></li>
+                        </ul></li>
+                    <li class="has-menu"><a href="#" class="" >金利情報</a>
+                        <ul class="sub-menu">
+                            <li><a href="">金利一覧</a></li>
+                            <li><a href="/upload/form">金融機関の追加</a></li>
+                            <li><a href="/change_info/form">金利の変更</a></li>
+                            <li><a href="">金利の削除</a></li>
+                        </ul></li>
+                    <li class="has-menu"><a href="#">アカウント情報</a>
+                        <ul class="sub-menu">
+                            <li><a class="login" href="/register">アカウントの作成</a></li>
+                            <li><a class="logout" href="/login">ログイン</a></li>
+                            <li><a class="logout" href="/logout">ログアウト</a></li>
+                        </ul></li>
+                    <li><a href="" class="">お問合せ</a></li>
+                </ul>
+                <div class="hamburger" id="open_nav">
+                    <img src="{% static '/assets/hamburger.png' %}" alt="">
+                </div>
+            </div>
+     </div>
+</header>
+
+
+<main>
+    {% block contents %}
+
+    {% endblock %}
+</main>
+
+
+<footer>
+    <a href="/" class="paging">トップページに戻る</a>
+</footer>
+
+</div>
+<!-- wrapper -->
+
+<!-- side menu -->
+<nav id="nav">
+    <div class="hamburger-menu">
+    <h3>メニュー</h3>
+    <ul>
+        <li>
+            <h4><a href="/">ホーム</a></h4>
+        </li>
+        <li>
+            <div class="hidden_list">
+                <h4>計算</h4>
+                <ul class="hidden_list hidden">
+                    <li><a href="/borrowable/form">借入可能額の計算</a></li>
+                    <li><a href="/required_income/form">必要な年収の計算</a></li>
+                    <li><a href="/repaid/form">月々の支払いを計算</a></li>
+                </ul>
+            </div>
+        </li>
+        <li>
+            <div class="hidden_list">
+                <h4>金利情報</h4>
+                <ul class="hidden">
+                    <li><a href="/">金利一覧</a></li>
+                    <li><a href="/upload/form">金融機関の追加</a></li>
+                    <li><a href="/change_info/form">金利の変更</a></li>
+                    <li><a href="/">金融機関の削除</a></li>
+                </ul>
+            </div>
+        </li>
+        <li>
+            <div class="hidden_list">
+                <h4>アカウント情報</h4>
+                <ul class="hidden">
+                    <li><a href="/register">アカウントの作成</a></li>
+                    <li><a href="/login">ログイン</a></li>
+                    <li><a href="/logout">ログアウト</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</div>
+
+</nav>
+<!-- side menu -->
+<script src="{% static '/js/jquery-3.6.1.min.js' %}"></script>
+<script src="{% static '/js/script.js' %}"></script>
+<script>
+    'use strict';
+
+    $(document).ready(function(){
+        $('#open_nav').on('click', function(){
+            $('#wrapper, #nav').toggleClass('show');
+        });
+    });
+
+    $(document).ready(function(){
+        $('.hidden_list h4').on('click', function() {
+            $(this).next().toggleClass('hidden');
+        });
+    });
+
+
+</script>
+
+{% block footer_script %}
+
+
+{% endblock %}
+</body>
+</html>

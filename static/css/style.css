@@ -283,9 +283,20 @@ td {
 /* フォーム */
 .form-text {
     width: 60%;
-    height:     1.5rem;
-    background: white;
+    height: 1.5rem;
+    padding: 0rem;
     margin-right:0.25rem;
+}
+
+.form-text input {
+    width: 60%;
+    background-color: white;
+}
+
+.form-text textarea {
+    margin-top: 1rem;
+    padding-bottom: 7rem;
+    background-color: white;
 }
 
 .form-text:focus {
@@ -356,6 +367,30 @@ footer a:hover {
 }
 
 
+/* アラートメッセージ */
+.alert {
+    margin: auto;
+    text-align: center;
+    max-width: 600px;
+    font-size: 1.35rem;
+}
+.alert-danger{
+    color: #E39210;
+    padding: 1rem;
+}
+.alert-warning{
+    color: #E39210;
+    padding: 1rem;
+}
+.alert-success{
+    color: #053177;
+    padding: 1rem;
+
+}
+.alert-info{
+    color: #053177;
+    padding: 1rem;
+}
 
 
 
@@ -454,7 +489,7 @@ footer a:hover {
 
 /* ラジオボタン */
 
-.select-radio {
+.select_radio {
     display: flex;
     justify-content:space-between;
 }

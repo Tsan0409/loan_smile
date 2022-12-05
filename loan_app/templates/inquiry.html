@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}お問合せ | Private Diary {% endblock %}
+
+{% block active_inquiry %}active{% endblock %}
+
+
+{% block contents %}
+
+
+
+        <h1 class="content-head">お問合せ</h1>
+        <p class="contents-ex">必要事項を入力してください</p>
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <table>
+                {% for field in form %}
+                <tr>
+                    <th>
+                        {{ field.label_tag }}
+                    </th>
+                    <td class="form-text">
+                        {{ field }}
+                    </td>
+                    {{ field.errors }}
+                </tr>
+                {% endfor %}
+            </table>
+            <button class="btn btn-primary" type="submit">送信</button>
+        </form>
+
+
+
+{% endblock %}

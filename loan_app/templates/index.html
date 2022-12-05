@@ -4,8 +4,8 @@
 
 {% block contents %}
 
+
 <section class="main-page">
-    <div class="container">
         <img src="{% static '/assets/smile_navi_tr.png' %}"  class="main-logo">
         <div class="subject-display">
             <div class="contents">
@@ -13,7 +13,7 @@
                 <a href="/borrowable/form">借入可能額</a>
                 <a href="/required_income/form">借入に必要な年収</a>
                 <a href="/repaid/form">月々の支払い</a>
-                <a href="/sample">サンプル</a>
+                <a href="{% url 'loan_app:sample' %}">サンプル</a>
             </div>
             <div class="contents">
                 <h1 class="subject">住宅ローン情報</h1>
@@ -29,6 +29,5 @@
 
             </div>
         </div>
-    </div>
 </section>
 {% endblock %}

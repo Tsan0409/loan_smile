@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}サインアップ | Loan Smile{% endblock %}
+
+{% block active_signup %}active{% endblock %}
+
+{% block contents %}
+
+            <h1 class="content-head">サインアップ</h1>
+            <form action="{% url 'account_signup' %}" method="post">
+                {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <table>
+                {% for field in form %}
+                <tr>
+                    <th>
+                        {{ field.label_tag }}
+                    </th>
+                    <td class="form-text">
+                        {{ field }}
+                    </td>
+                    {{ field.errors }}
+                </tr>
+                {% endfor %}
+            </table>
+
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                {% endif %}
+
+                <button class="btn btn-primary" type="submit">登録</button>
+            </form>
+
+
+{% endblock %}

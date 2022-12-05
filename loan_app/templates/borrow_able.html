@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block contents %}
+
+    <h1 class="content-head">借入可能額</h1>
+    <p class="contents-ex">必要事項を入力してください</p>
+<!--        <form action="/borrowable/form/try" method="POST" enctype="multipart/form-data" id="form" class="form">-->
+        <form action="" method="post" id="form" class="form">
+            {% csrf_token %}
+
+            <table>
+
+                {% for field in form %}
+                <tr>
+                    <th>
+                        <label for="">{{ field.label }}</label>
+                    </th>
+                    <td class="form-text">
+                        {{ field }}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </table>
+
+            <button type="submit">計算</button>
+        </form>
+        <table id="ans" class="">
+            <tr>
+                <th>借入可能額</th>
+                <td>
+                    <span  class="answer">
+                        {{ borrowable }}
+                    </span> 円
+                </td>
+            </tr>
+        </table>
+
+{% endblock %}
+
+{% block footer_script %}
+
+<script>
+
+
+
+</script>
+{% endblock  %}

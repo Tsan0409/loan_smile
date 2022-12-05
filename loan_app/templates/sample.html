@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contents %}
+    {% for error in form.non_field_errors %}
+        {{ error }}
+    {% endfor %}
+
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <table>
+
+        {% for field in form %}
+            <tr>
+                    <th>
+                        <label for="">{{ field.label }}</label>
+                    </th>
+                    <td class="form_text">
+                        {{ field }}
+                    </td>
+                </tr>
+
+        {% endfor %}
+            </table>
+
+
+
+
+        <input type="submit" value="変換" class="btn" />
+
+    </form>
+    <h1>変換後</h1>
+    <p class="contents">{{ new_text }}</p>
+    {{ form.non_field_errors }}
+
+
+
+{% endblock%}

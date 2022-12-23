@@ -6,7 +6,6 @@
 
     <h1 class="content-head">借入可能額</h1>
     <p class="contents-ex">必要事項を入力してください</p>
-<!--        <form action="/borrowable/form/try" method="POST" enctype="multipart/form-data" id="form" class="form">-->
         <form action="" method="post" id="form" class="form">
             {% csrf_token %}
 
@@ -15,19 +14,29 @@
                 {% for field in form %}
                 <tr>
                     <th>
-                        <label for="">{{ field.label }}</label>
+                        {{ field.label }}
                     </th>
                     <td class="form-text">
                         {{ field }}
                     </td>
                 </tr>
                 {% endfor %}
-
+                <tr>
+                    <th>
+                        金利情報
+                    </th>
+                    <td class="form-text">
+                        <select name="bank_rate" class="select_radio" id="id_bank_rate">
+                        </select>
+                    </td>
+                </tr>
             </table>
-
-            <button type="submit">計算</button>
+            <button type="submit" onclick="create_answer()">計算</button>
         </form>
-        <table id="ans" class="">
+
+        {% if borrowable > 0 %}
+
+        <table id="ans" >
             <tr>
                 <th>借入可能額</th>
                 <td>
@@ -38,13 +47,24 @@
             </tr>
         </table>
 
+        {% endif %}
+
+
 {% endblock %}
 
 {% block footer_script %}
 
-<script>
+
+
+const info = {{ BankInfo | safe }}
+
+const order = ['変動金利型','固定金利選択型01年','固定金利選択型02年','固定金利選択型03年','固定金利選択型05年','固定金利選択型07年','固定金利選択型10年','固定金利選択型15年','固定金利選択型20年','固定金利選択型30年','全期間固定金利型11〜15年','全期間固定金利型16〜20年','全期間固定金利型21〜25年','全期間固定金利型26〜30年','全期間固定金利型31〜35年']
+
+on_radio()
 
 
 
-</script>
+
+
+
 {% endblock  %}

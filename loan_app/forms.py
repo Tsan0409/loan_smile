@@ -1,18 +1,12 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Post
+from .models import Bank, InterestRate
+
 
 import os
 
 from django.core.mail import EmailMessage
 
-
-
-
-CHOICE = {
-    ('0','金利を入力'),
-    ('1','金融機関から選択'),
-}
 
 
 class InquiryForm(forms.Form):
@@ -59,23 +53,28 @@ class InquiryForm(forms.Form):
 
 # サンプル
 class SampleForm(forms.Form):
+    CHOICE_RADIO = [
+        ('0', '金利を入力'),
+        ('1', '金融機関から選択'), ]
+
+    user_name = None
     text = forms.CharField(label='テキスト', widget=forms.Textarea)
     search = forms.CharField(label='検索')
     replace = forms.CharField(label='痴漢')
-    select = forms.ChoiceField(label='属性', widget=forms.RadioSelect,
-                               choices=CHOICE, initial=0)
+    select = forms.ChoiceField(label='属性', widget=forms.RadioSelect(attrs={'onchange': "on_radio();"}), choices=CHOICE_RADIO, initial=0)
+    choice = forms.ModelChoiceField(
+        queryset=Bank.objects.none(),
+        required=True,
+        widget=forms.widgets.Select,
+        label='銀行名'
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self. fields.values():
-            copy = str(field)
-            print(self. fields.values())
-            print(f'cコピーです{copy}')
-            if 'ChoiceField' in copy:
-                print('rarararara')
-                field.widget.attrs['class'] = 'select_radio'
-            else:
-                field.widget.attrs['class'] = 'form-text'
+        print(f'form: {user}')
+        print(self.user_name)
+        print(self.fields['choice'])
+        self.fields['choice'].queryset = Bank.objects.all().select_related('user_id').filter(user_id=user)
 
     def clean(self):
         data = super().clean()
@@ -88,31 +87,43 @@ class SampleForm(forms.Form):
             raise ValidationError('テキストが短過ぎます。')
         return data
 
-# サンプル（フォームからそのまま引き継ぐことも可能）
-class PostForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['title', 'body']
-
 
 class BorrowAbleForm(forms.Form):
+
+    user_name = None
+    CHOICE_RADIO = [('0', '金利を入力'),
+                    ('1', '金融機関から選択'), ]
+
     income = forms.IntegerField(label='年収')
     repayment_ratio = forms.IntegerField(label='借入比率')
     debt = forms.IntegerField(label='負債')
     year = forms.IntegerField(label=' 年数')
-    select = forms.ChoiceField(label='属性', widget=forms.RadioSelect,
-                               choices=CHOICE, initial=0)
+    select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
+                               widget=forms.RadioSelect(
+                                   attrs={'onchange': "on_radio();"}))
     interest = forms.FloatField(label='金利', required=False)
-    from_bank = forms.FloatField(label='金融機関から選択', required=False)
+    bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
+                                  widget=forms.widgets.Select(
+                                   attrs={'onchange': "select_da();"}), label='銀行名')
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self. fields.values():
+
+        # Classの付与
+        for field in self.fields.values():
             copy = str(field)
             if 'ChoiceField' in copy:
                 field.widget.attrs['class'] = 'select_radio'
             else:
                 field.widget.attrs['class'] = 'form-text'
+        print(f'user_id　form: {user}')
+
+        # ユーザー別の銀行データを渡す
+        self.fields['bank'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)
+
+
 
 
 

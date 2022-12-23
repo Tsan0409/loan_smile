@@ -15,26 +15,47 @@
         {% for field in form %}
             <tr>
                     <th>
-                        <label for="">{{ field.label }}</label>
+                        {{ field.label }}
                     </th>
-                    <td class="form_text">
+                    <td class="form-text">
                         {{ field }}
+
                     </td>
                 </tr>
 
         {% endfor %}
+
+                <tr>
+                    <th class="no-head"></th>
+                    <td id="insert_form" class="form-text">
+                    </td>
+                </tr>
             </table>
 
 
-
-
-        <input type="submit" value="変換" class="btn" />
+        <button type="submit" >変換</button>
 
     </form>
-    <h1>変換後</h1>
+    <h1>変換後{{ data }}</h1>
     <p class="contents">{{ new_text }}</p>
     {{ form.non_field_errors }}
 
 
 
 {% endblock%}
+
+{% block footer_script %}
+
+const info = {{ Rate3 | safe }}
+const name_name = '三井住友銀行'
+const order = ['変動金利型','固定金利選択型01年','固定金利選択型02年','固定金利選択型03年','固定金利選択型05年','固定金利選択型07年','固定金利選択型10年','固定金利選択型15年','固定金利選択型20年','固定金利選択型30年','全期間固定金利型11〜15年','全期間固定金利型16〜20年','全期間固定金利型21〜25年','全期間固定金利型26〜30年','全期間固定金利型31〜35年']
+on_radio()
+
+if
+
+
+
+
+
+
+{% endblock  %}

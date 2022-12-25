@@ -8,7 +8,6 @@ import os
 from django.core.mail import EmailMessage
 
 
-
 class InquiryForm(forms.Form):
     name = forms.CharField(label='お名前', max_length=30)
     email = forms.EmailField(label='メールアドレス')
@@ -124,21 +123,35 @@ class BorrowAbleForm(forms.Form):
             'user_id').filter(user_id=user)
 
 
+class RequiredIncomeForm(forms.Form):
 
+    user_name = None
+    CHOICE_RADIO = [('0', '金利を入力'),
+                    ('1', '金融機関から選択'), ]
 
+    borrow = forms.IntegerField(label='借入額')
+    repayment_ratio = forms.IntegerField(label='借入比率')
+    year = forms.IntegerField(label=' 年数')
+    select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
+                               widget=forms.RadioSelect(
+                                   attrs={'onchange': "on_radio();"}))
+    interest = forms.FloatField(label='金利', required=False)
+    bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
+                                  widget=forms.widgets.Select(
+                                   attrs={'onchange': "select_da();"}), label='銀行名')
 
-# def borrowable_try(**kwargs):
-#     income, repayment_ratio, debt, year, radio = sys.forms_get_i(
-#         li=['income', 'repayment_ratio', 'debt', 'year', 'radio', ])
-#     interest_rate = sys.radio_btn(radio,
-#                                   btn_list=['interest_rate', 'bank_rate'])
-#     million_per = cal.million_per(interest_rate, year)
-#     borrowable = cal.borrowable(income, repayment_ratio, debt, million_per)
-#     bank_info = cs.user_to_rate(user.get_id()) if kwargs[
-#                                                       'check'] == 'login' else cs.get_guest_data()
-#     return render_template('borrowable_form.html',
-#                            borrowable=cal.com(borrowable), income=income,
-#                            bank_info=bank_info,
-#                            interest_rate=interest_rate, debt=debt, year=year,
-#                            radio=radio, repayment_ratio=repayment_ratio,
-#                            bank_name=request.form.get('bank_name'))
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Classの付与
+        for field in self.fields.values():
+            copy = str(field)
+            if 'ChoiceField' in copy:
+                field.widget.attrs['class'] = 'select_radio'
+            else:
+                field.widget.attrs['class'] = 'form-text'
+        print(f'user_id　form: {user}')
+
+        # ユーザー別の銀行データを渡す
+        self.fields['bank'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)

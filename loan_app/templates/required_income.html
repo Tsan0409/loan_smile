@@ -4,7 +4,7 @@
 
 {% block contents %}
 
-    <h1 class="content-head">借入可能額</h1>
+    <h1 class="content-head">借入に必要な年収</h1>
     <p class="contents-ex">必要事項を入力してください</p>
         <form action="" method="post" id="form" class="form">
             {% csrf_token %}
@@ -34,20 +34,21 @@
             <button type="submit" onclick="create_answer()">計算</button>
         </form>
 
-        {% if borrowable is not None %}
+        {% if required_income is not None %}
 
         <table id="ans" >
             <tr>
                 <th>借入可能額</th>
                 <td>
                     <span  class="answer">
-                        {{ borrowable }}
+                        {{ required_income }}
                     </span> 円
                 </td>
             </tr>
         </table>
 
-        {% endif %}
+    {% endif %}
+
 
 
 {% endblock %}

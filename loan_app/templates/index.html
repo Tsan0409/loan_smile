@@ -10,24 +10,23 @@
         <div class="subject-display">
             <div class="contents">
             <h1 class="subject">計算</h1>
-                <a href="/borrowable/form">借入可能額</a>
-                <a href="/required_income/form">借入に必要な年収</a>
-                <a href="/repaid/form">月々の支払い</a>
+                <a href="{% url 'loan_app:borrow_able' %}">借入可能額</a>
+                <a href="{% url 'loan_app:required_income' %}">借入に必要な年収</a>
+                <a href="{% url 'loan_app:repaid' %}">月々の支払い</a>
                 <a href="{% url 'loan_app:sample' %}">サンプル</a>
                 <a href="{% url 'loan_app:sampleb' %}">サンプルB</a>
             </div>
             <div class="contents">
                 <h1 class="subject">住宅ローン情報</h1>
                     <a href="">金利一覧</a>
-                    <a href="/upload/form">ローン情報の追加</a>
-                    <a href="/change_info/form">ローン情報の変更</a>
+                    <a href="{% url 'loan_app:create_interest' %}">ローン情報の追加</a>
+                    <a href="{% url 'loan_app:choice_bank' %}">ローン情報の変更</a>
             </div>
             <div class="contents">
                     <h1 class="subject">アカウント情報</h1>
-                    <a name="logout" class="logout" href="/register">アカウントの作成</a>
-                    <a name="logout" class="logout" href="/login">ログイン</a>
-                    <a name="login" class="login" href="/logout">ログアウト</a>
-
+                    <a name="logout" class="logout" href="{% url 'account_signup' %}">アカウントの作成</a>
+                    <a name="logout" class="logout" href="{% url 'account_login' %}">ログイン</a>
+                    <a name="login" class="login" href="{% url 'account_logout' %}">ログアウト</a>
             </div>
         </div>
 </section>

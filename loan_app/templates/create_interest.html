@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block contents %}
+
+    {% for error in form.non_field_errors %}
+        {{ error }}
+    {% endfor %}
+
+    <h1 class="content-head">金利情報の登録</h1>
+    <p class="contents-ex">必要事項を入力してください</p>
+        <form method="post" id="form" class="form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <table>
+
+                {% for field in form %}
+                <tr>
+                    <th>
+                        {{ field.label }}
+                    </th>
+                    <td class="form-text">
+                        {{ field }}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </table>
+
+            {{ formset.management_form }}
+            {% for file_form in formset %}
+                {{ file_form.as_p }}
+            <hr>
+            {% endfor %}
+            <button type="submit">登d</button>
+        </form>
+
+
+{% endblock %}
+
+{% block footer_script %}
+
+
+
+{% endblock  %}

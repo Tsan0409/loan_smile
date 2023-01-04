@@ -12,11 +12,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import JsonResponse
 
 
-from .forms import InquiryForm, SampleForm, BorrowAbleForm, RequiredIncomeForm
+from .forms import InquiryForm, SampleForm, BorrowAbleForm,\
+    RequiredIncomeForm, RepaidForm, CreateInterestForm,\
+    ChangeInterestForm, ChoiceBankForm
 from .models import Bank, InterestRate, Option
 
 
 from math import floor, ceil
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -138,9 +144,13 @@ class BorrowAbleView(generic.FormView, LoginRequiredMixin):
             interest_rate = data['interest']
         else:
             interest_rate = float(self.request.POST['bank_rate'])
+        if interest_rate == 0 or interest_rate is None:
+            interest_rate = 0
+            ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
+            return self.render_to_response(ctxt)
         million_per = self.million_per(interest_rate, year)
         borrowable = self.com(self.borrowable(income, repayment_ratio, debt, million_per))
-        ctxt = self.get_context_data(borrowable=borrowable, form=form)
+        ctxt = self.get_context_data(interest_rate=interest_rate, borrowable=borrowable, form=form)
         return self.render_to_response(ctxt)
 
     # フォームにデータを送る
@@ -216,6 +226,7 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
 
     # 計算処理
     def form_valid(self, form):
+        print('c')
         data = form.cleaned_data
         borrow = data['borrow']
         repayment_ratio = data['repayment_ratio']
@@ -225,9 +236,13 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
             interest_rate = data['interest']
         else:
             interest_rate = float(self.request.POST['bank_rate'])
+        if interest_rate == 0 or interest_rate is None:
+            interest_rate = 0
+            ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
+            return self.render_to_response(ctxt)
         million_per = self.million_per(interest_rate, year)
         required_income = self.com(self.required_income(repayment_ratio, million_per, borrow))
-        ctxt = self.get_context_data(required_income=required_income, form=form)
+        ctxt = self.get_context_data(interest_rate=interest_rate, required_income=required_income, form=form)
         return self.render_to_response(ctxt)
 
     # フォームにデータを送る
@@ -293,34 +308,289 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
         i = '{:,}'.format(i)
         return i
 
-# # 返済
-# @app.route('/repaid/form')
-# @user.login_confirmation
-# def repaid_form(**kwargs):
-#     bank_info = cs.user_to_rate(user.get_id()) if kwargs['check'] == 'login' else cs.get_guest_data()
-#     return render_template('repaid_form.html', bank_info=bank_info, bank_name='選択してください', radio=2, interest_rate=0, P_PIradio=0)
-#
-# @app.route('/repaid/form/try', methods=['GET','POST'])
-# @user.login_confirmation
-# def repaid_try(**kwargs):
-#     borrow, year, radio, P_PIradio = sys.forms_get_i(li=['borrow', 'year', 'radio', 'P_PIradio'])
-#     interest_rate = sys.radio_btn(radio, btn_list=['interest_rate', 'bank_rate'])
-#     if interest_rate is None: return msg('必要事項が入力されていません')
-#     if P_PIradio == 0:
-#         photo = cre.create_Pcsv(borrow, interest_rate, year)
-#         amount_repaid = (cal.paid(borrow, interest_rate, year))
-#         total_repaid = (cal.total_repaid(amount_repaid))
-#         interest = cal.interest(borrow, total_repaid)
-#         data = cre.read('Pdata.csv', year)
-#         cre.csv_to_excel('Pdata.csv')
-#         amount_repaid = cal.com(amount_repaid)
-#     else:
-#         photo = cre.create_PIcsv(borrow, interest_rate, year)
-#         data = cre.read('PIdata.csv', year)
-#         cre.csv_to_excel('PIdata.csv')
-#         amount_repaid = data[0][0][1]
-#         total_repaid = cal.total_PIrepaid(interest_rate, borrow, year)
-#         interest = total_repaid - borrow * 10000
-#     bank_info = cs.user_to_rate(user.get_id()) if kwargs['check'] == 'login' else cs.get_guest_data()
-#     return render_template('repaid_form.html', borrow=borrow, year=year, interest_rate=interest_rate, bank_info=bank_info, radio=radio, bank_name=request.form.get('bank_name'),
-#                            amount_repaid=amount_repaid, total_repaid=cal.com(total_repaid), interest=cal.com(interest), photos=photo, data=data, P_PIradio=P_PIradio)
+
+class RepaidView(generic.FormView, LoginRequiredMixin):
+
+    form_class = RepaidForm
+    model = InterestRate
+    template_name = 'repaid.html'
+
+    # 計算処理
+    def form_valid(self, form):
+        data = form.cleaned_data
+        borrow = data['borrow']
+        borrow *= 10000
+        year = data['year']
+        select = data['select']
+        repaid_type = data['repaid_type']
+        if select == '0':
+            interest_rate = data['interest']
+        else:
+            interest_rate = float(self.request.POST['bank_rate'])
+        if interest_rate == 0 or interest_rate is None:
+            interest_rate = 0
+            ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
+            return self.render_to_response(ctxt)
+        if repaid_type == '0':
+            js_data = self.create_Pcsv(borrow, interest_rate, year)
+            amount_repaid = self.paid(borrow, interest_rate, year)
+            total_repaid = self.total_repaid(amount_repaid)
+            interest = self.interest(borrow, total_repaid)
+            data = self.read('Pdata.csv', year)
+            # self.csv_to_excel('Pdata.csv')
+            amount_repaid = self.com(amount_repaid)
+        else:
+            js_data = self.create_PIcsv(borrow, interest_rate, year)
+            data = self.read('PIdata.csv', year)
+            # self.csv_to_excel('PIdata.csv')
+            amount_repaid = data[0][1]
+            total_repaid = self.total_PIrepaid(interest_rate, borrow, year)
+            interest = total_repaid - borrow
+        ctxt = self.get_context_data(interest_rate=interest_rate, borrow=self.com(borrow), amount_repaid=amount_repaid,
+                                     total_repaid=self.com(total_repaid), interest=self.com(interest),
+                                     data=data,  form=form, js_data=js_data)
+        return self.render_to_response(ctxt)
+
+    # templatesにデータを送る
+    def get_context_data(self, **kwargs,):
+        context = super().get_context_data(**kwargs)
+        bank_info = self.get_bank_info()
+        context['BankInfo'] = bank_info
+        return context
+
+    # ログイン情報をform.pyに送る
+    def get_form_kwargs(self, *args, **kwargs):
+        kwgs = super().get_form_kwargs(*args, **kwargs)
+        user_name = self.get_userid()
+        print(f'user_id　view: {user_name}')
+        kwgs["user"] = user_name
+        return kwgs
+
+    # 金利作成
+    def get_bank_info(self):
+        user_name = self.get_userid()
+        json_encode = InterestRate.objects.all().select_related('bank_id').filter(bank_id__user_id=user_name)
+        bank_info = []
+        for i in json_encode:
+            bank_data = {
+                "bank_id": i.bank_id_id, "変動金利型": i.floating,
+                "固定金利選択型01年": i.fixed_1, "固定金利選択型02年": i.fixed_2, "固定金利選択型03年": i.fixed_3,
+                "固定金利選択型05年": i.fixed_5, "固定金利選択型07年": i.fixed_7, "固定金利選択型10年": i.fixed_10,
+                "固定金利選択型15年": i.fixed_15, "固定金利選択型20年": i.fixed_20, "固定金利選択型30年": i.fixed_30,
+                '全期間固定金利型11〜15年': i.fix_10to15, '全期間固定金利型16〜20年': i.fix_15to20,
+                '全期間固定金利型21〜25年': i.fix_20to25, '全期間固定金利型26〜30年': i.fix_25to30,
+                '全期間固定金利型31〜35年': i.fix_30to35
+                    }
+            bank_info.append(bank_data)
+        return bank_info
+
+    # ユーザー分
+    def get_userid(self):
+        if not self.request.user.is_authenticated:
+            user_name = '1'
+        else:
+            user_name = self.request.user
+        return user_name
+
+    # 100万あたりの返済額
+    def million_per(self, interest_rate, year):
+        repaid = self.paid(100, interest_rate, year)
+        return int(repaid)
+
+    # 支払い
+    def paid(self, borrowed, interest_rate, year):
+        n = borrowed
+        i = interest_rate / 12 / 100
+        t = year * 12
+        repaid = n * i * ((1 + i) ** t) / (((1 + i) ** t) - 1)
+        repaid = floor(repaid)
+        return int(repaid)
+
+    def com(self, i):
+        i = '{:,}'.format(i)
+        return i
+
+    def P_paid(self, borrow, a_interest, a_year):
+        df = {}
+        interest_m = a_interest / 12 / 100
+        t = a_year * 12
+        pa = self.paid(borrow, a_interest, a_year)
+        for n in range(t):
+            interest = floor(borrow * interest_m)
+            principal = pa - interest
+            borrow -= principal
+            if borrow < 0:
+                pa += borrow
+                principal += borrow
+                borrow = 0
+            df[f'{n + 1}'] = [pa, interest, principal, borrow]
+        return df
+
+    # 元金均等
+    def PI_paid(self, borrow, _interest, _year):
+        df = {}
+        t = _year * 12
+        principal = floor(borrow / t)
+        interest_m = _interest / 12 / 100
+        for n in range(t):
+            interest = floor(borrow * interest_m)
+            pay = interest + principal
+            borrow -= principal
+            if n == 419:
+                pay += borrow
+                principal += borrow
+                borrow = 0
+            df[f'{n + 1}'] = [pay, interest, principal, borrow]
+        return df
+
+    # 元金均等
+    def create_PIcsv(self, borrow, interest, year):
+        paid = self.PI_paid(borrow, interest, year)
+        month = []
+        interest_list = []
+        principal_list = []
+        total_list = []
+        for key, value in paid.items():
+            month.append(key)
+            total_list.append(value[0])
+            interest_list.append(value[1])
+            principal_list.append(value[2])
+        js = [month, interest_list, principal_list, total_list]
+        df = pd.DataFrame(paid)
+        df.to_csv('PIdata.csv')
+        # filename = self.create_graph('PIdata.csv', 'PIgraph')
+        return js
+
+    # 元利均等
+    def create_Pcsv(self, borrow, interest, year):
+        paid = self.P_paid(borrow, interest, year)
+        month = []
+        interest_list = []
+        principal_list = []
+        total_list = []
+        print(paid)
+        for key, value in paid.items():
+            month.append(key)
+            interest_list.append(value[1])
+            principal_list.append(value[2])
+            total_list.append(value[0])
+        js = [month, interest_list, principal_list, total_list]
+        df = pd.DataFrame(paid)
+        df.to_csv('Pdata.csv')
+        # filename = self.create_graph('Pdata.csv', 'Pgraph')
+        return js
+
+    # 返済総額(元利)
+    def total_repaid(self, repaid):
+        TotalRepaid = repaid * 420
+        return TotalRepaid
+
+    # 返済総額(元金)
+    def total_PIrepaid(self, interest_rate, borrowed, year):
+        times = year * 12
+        principal = floor(borrowed / times)
+        interest_m = interest_rate / 12 / 100
+        total_repaid = borrowed
+        for n in range(times):
+            interest = floor(borrowed * interest_m)
+            total_repaid += interest
+            borrowed -= principal
+        return int(total_repaid)
+
+    # 利息分
+    def interest(self, borrowed, total_repaid):
+        t = int(total_repaid)
+        n = int(t - borrowed)
+        return n
+
+    def read(self, csv, year):
+        df = pd.read_csv(csv)
+        li = ["1", '13', '25', '49', '109', '228', '349', '409']
+        years = [' 1年目', '  2年目', ' 3年目', ' 5年目', '10年目', '20年目', '30年目',
+                 '35年目']
+        contents = {}
+        if year == 35:
+            count = 7
+        elif year >= 30:
+            count = 6
+        elif year >= 20:
+            count = 5
+        elif year >= 10:
+            count = 4
+        elif year >= 5:
+            count = 3
+        elif year >= 2:
+            count = 2
+        elif year >= 1:
+            count = 1
+        else:
+            count = 0
+        for n in range(count + 1):
+            ind = [years[n]]
+            for i in range(4):
+                ind.append(str(self.com(df.iloc[i][li[n]])))
+            contents[n] = ind
+        return contents
+
+
+class CreateInterestView(generic.FormView, LoginRequiredMixin):
+
+    form_class = CreateInterestForm
+    template_name = 'create_interest.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:index')
+
+    def form_valid(self, form):
+        form.save(user_name=self.request.user)
+
+        # interest_rate.user = self.request.user
+        # interest_rate.save()
+        messages.success(self.request, '金利情報を追加しました')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, '金利情報を追加できませんでした')
+        return super().form_invalid(form)
+
+
+class ChoiceBankView(generic.FormView, LoginRequiredMixin):
+
+    form_class = ChoiceBankForm
+    model = Bank
+    template_name = 'choice_bank.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:change_interest', kwargs={'pk': self.request.POST['bank']})
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwgs = super().get_form_kwargs(*args, **kwargs)
+        user_name = self.get_userid()
+        kwgs["user"] = user_name
+        return kwgs
+
+    # ユーザー分
+    def get_userid(self):
+        if not self.request.user.is_authenticated:
+            user_name = '1'
+        else:
+            user_name = self.request.user
+        return user_name
+
+
+class ChangeInterestView(generic.UpdateView, LoginRequiredMixin):
+
+    form_class = ChangeInterestForm
+    model = InterestRate
+    template_name = 'create_interest.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:index')
+
+    def form_valid(self, form):
+        messages.success(self.request, '金利情報を変更しました')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, '金利情報を変更できませんでした')
+        return super().form_invalid(form)

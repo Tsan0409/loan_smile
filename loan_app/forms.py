@@ -2,7 +2,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Bank, InterestRate
 
-
 import os
 
 from django.core.mail import EmailMessage
@@ -60,7 +59,8 @@ class SampleForm(forms.Form):
     text = forms.CharField(label='テキスト', widget=forms.Textarea)
     search = forms.CharField(label='検索')
     replace = forms.CharField(label='痴漢')
-    select = forms.ChoiceField(label='属性', widget=forms.RadioSelect(attrs={'onchange': "on_radio();"}), choices=CHOICE_RADIO, initial=0)
+    select = forms.ChoiceField(label='属性', widget=forms.RadioSelect(
+        attrs={'onchange': "on_radio();"}), choices=CHOICE_RADIO, initial=0)
     choice = forms.ModelChoiceField(
         queryset=Bank.objects.none(),
         required=True,
@@ -73,7 +73,8 @@ class SampleForm(forms.Form):
         print(f'form: {user}')
         print(self.user_name)
         print(self.fields['choice'])
-        self.fields['choice'].queryset = Bank.objects.all().select_related('user_id').filter(user_id=user)
+        self.fields['choice'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)
 
     def clean(self):
         data = super().clean()
@@ -88,7 +89,6 @@ class SampleForm(forms.Form):
 
 
 class BorrowAbleForm(forms.Form):
-
     user_name = None
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
@@ -96,15 +96,16 @@ class BorrowAbleForm(forms.Form):
     income = forms.IntegerField(label='年収')
     repayment_ratio = forms.IntegerField(label='借入比率')
     debt = forms.IntegerField(label='負債')
-    year = forms.IntegerField(label=' 年数')
+    year = forms.IntegerField(label=' 年数', min_value=1)
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', required=False)
+    interest = forms.FloatField(label='金利', min_value=0.01)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
-                                   attrs={'onchange': "select_da();"}), label='銀行名')
-
+                                      attrs={
+                                          'onchange': "select_da(interest_ra);"}),
+                                  label='銀行名')
 
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -116,29 +117,40 @@ class BorrowAbleForm(forms.Form):
                 field.widget.attrs['class'] = 'select_radio'
             else:
                 field.widget.attrs['class'] = 'form-text'
-        print(f'user_id　form: {user}')
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
             'user_id').filter(user_id=user)
 
+    def clean(self):
+        data = super().clean()
+        print(data)
+        # 途中でエラーを起こすz
+        radio = data['select']
+        print(radio)
+        if radio == '1':
+            data[4] = 0
+        return data
+
 
 class RequiredIncomeForm(forms.Form):
-
     user_name = None
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
 
     borrow = forms.IntegerField(label='借入額')
     repayment_ratio = forms.IntegerField(label='借入比率')
-    year = forms.IntegerField(label=' 年数')
+    year = forms.IntegerField(label=' 年数', min_value=1)
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', required=False)
+    interest = forms.FloatField(label='金利',
+                                min_value=0.01)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
-                                   attrs={'onchange': "select_da();"}), label='銀行名')
+                                      attrs={
+                                          'onchange': "select_da(interest_ra)"}),
+                                  label='銀行名')
 
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -150,8 +162,146 @@ class RequiredIncomeForm(forms.Form):
                 field.widget.attrs['class'] = 'select_radio'
             else:
                 field.widget.attrs['class'] = 'form-text'
-        print(f'user_id　form: {user}')
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
             'user_id').filter(user_id=user)
+
+
+class RepaidForm(forms.Form):
+    user_name = None
+    CHOICE_RADIO = [('0', '金利を入力'),
+                    ('1', '金融機関から選択'), ]
+
+    CHOICE_TYPE = [('0', '元利均等返済'),
+                   ('1', '元金均等返済'), ]
+    borrow = forms.IntegerField(label='借入額')
+    year = forms.IntegerField(label=' 年数', min_value=1)
+    repaid_type = forms.ChoiceField(label='返済タイプ', choices=CHOICE_TYPE,
+                                    initial=0,
+                                    widget=forms.RadioSelect())
+    select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
+                               widget=forms.RadioSelect(
+                                   attrs={'onchange': "on_radio();"}))
+    interest = forms.FloatField(label='金利', required=False, min_value=0.01)
+    bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
+                                  widget=forms.widgets.Select(
+                                      attrs={
+                                          'onchange': "select_da(interest_ra);"}),
+                                  label='銀行名')
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Classの付与
+        for field in self.fields.values():
+            copy = str(field)
+            if 'ChoiceField' in copy:
+                field.widget.attrs['class'] = 'select_radio'
+            else:
+                field.widget.attrs['class'] = 'form-text'
+
+        # ユーザー別の銀行データを渡す
+        self.fields['bank'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)
+
+
+class CreateInterestForm(forms.Form):
+
+    bank_name = forms.CharField(label='銀行名前')
+    floating = forms.FloatField(label='変動金利型', min_value=0)
+    fixed_1 = forms.FloatField(label='固定金利選択型01年', min_value=0)
+    fixed_2 = forms.FloatField(label='固定金利選択型02年', min_value=0)
+    fixed_3 = forms.FloatField(label='固定金利選択型05年', min_value=0)
+    fixed_5 = forms.FloatField(label='固定金利選択型05年', min_value=0)
+    fixed_7 = forms.FloatField(label='固定金利選択型07年', min_value=0)
+    fixed_10 = forms.FloatField(label='固定金利選択型10年', min_value=0)
+    fixed_15 = forms.FloatField(label='固定金利選択型15年', min_value=0)
+    fixed_20 = forms.FloatField(label='固定金利選択型20年', min_value=0)
+    fixed_30 = forms.FloatField(label='固定金利選択型30年', min_value=0)
+    fix_10to15 = forms.FloatField(label='全期間固定金利型11〜15年', min_value=0)
+    fix_15to20 = forms.FloatField(label='全期間固定金利型16〜20年', min_value=0)
+    fix_20to25 = forms.FloatField(label='全期間固定金利型21〜25年', min_value=0)
+    fix_25to30 = forms.FloatField(label='全期間固定金利型26〜30年', min_value=0)
+    fix_30to35 = forms.FloatField(label='全期間固定金利型31〜35年', min_value=0)
+
+    def save(self, user_name):
+
+        data = self.cleaned_data
+        print(data)
+        bank = Bank(bank_name=data['bank_name'], user_id=user_name)
+        bank.save()
+        print(bank.bank_id)
+        a = Bank.objects.all()
+        print(f'a{a}')
+        b = Bank.objects.all().filter(bank_id=4, bank_name=data['bank_name'], user_id=user_name)
+        print(f'b{b}')
+
+        c = Bank.objects.get(bank_name=data['bank_name'], user_id=user_name)
+        print(f'c{c.bank_name}')
+        print(f'c{c.bank_id}')
+
+        # interest = InterestRate(bank_id=InterestRate.bank_id_id, floating=data['floating'],
+        #                         fixed_1=data['fixed_1'], fixed_2=data['fixed_2'],
+        #                         fixed_3=data['fixed_3'], fixed_5=data['fixed_5'],
+        #                         fixed_7=data['fixed_7'], fixed_10=data['fixed_10'],
+        #                         fixed_15=data['fixed_15'], fixed_20=data['fixed_20'],
+        #                         fixed_30=data['fixed_30'], fix_10to15=data['fix_10to15'],
+        #                         fix_15to20=data['fix_15to20'], fix_20to25=data['fix_20to25'],
+        #                         fix_25to30=data['fix_25to30'], fix_30to35=data['fix_30to35']
+        #                         )
+        # interest.save()
+        print(bank)
+
+    def save_interest(self, bank_id):
+        return
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Classの付与
+        for field in self.fields.values():
+            copy = str(field)
+            if 'ChoiceField' in copy:
+                field.widget.attrs['class'] = 'select_radio'
+            else:
+                field.widget.attrs['class'] = 'form-text'
+
+
+class ChoiceBankForm(forms.Form):
+    bank = forms.ModelChoiceField(queryset=Bank.objects.none(),
+                                  widget=forms.widgets.Select(), label='銀行名')
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs),
+
+        # Classの付与
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-text'
+
+        self.fields['bank'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)
+
+
+class ChangeInterestForm(forms.ModelForm):
+    class Meta:
+        model = InterestRate
+        fields = (
+            'floating', 'fixed_1', 'fixed_2', 'fixed_3', 'fixed_5', 'fixed_7',
+            'fixed_10',
+            'fixed_15', 'fixed_20', 'fixed_30', 'fix_10to15', 'fix_15to20',
+            'fix_20to25', 'fix_25to30', 'fix_30to35'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Classの付与
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-text'
+
+# fields=[
+#     'bank_name',
+#     'floating', 'fixed_1', 'fixed_2', 'fixed_3', 'fixed_5', 'fixed_7',
+#     'fixed_10', 'fixed_15', 'fixed_20', 'fixed_30', 'fix_10to15',
+#     'fix_15to20', 'fix_20to25', 'fix_25to30', 'fix_30to35',]

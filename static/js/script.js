@@ -32,37 +32,61 @@ function no_hidden(id_name) {
 
 // 要素消す
 
+function add_required (id_name) {
+    const doc = document.getElementById(id_name);
+    console.log(doc);
+    doc.required;
+};
+
+function remove_required (id_name) {
+    document.getElementById(id_name).required = false;
+}
 
 // ラジオボタン（のみ）
 
 function on_radio() {
     let id_select = document.getElementById('id_select_0');
     if (id_select.checked) {
-        hidden_par('id_bank')
-        hidden_par('id_bank_rate')
-        no_hidden_par('id_interest')
-    } else {
-        hidden_par('id_interest')
-        hidden_par('id_bank_rate')
-        no_hidden_par('id_bank')
+//        自分で入力
+        hidden_par('id_bank');
+        hidden_par('id_bank_rate');
+        remove_required('id_bank');
+        remove_required('id_bank_rate');
+        no_hidden_par('id_interest');
+        add_required('id_interest');
 
-    }
+    } else {
+//        金融機関から選択
+        hidden_par('id_interest');
+        hidden_par('id_bank_rate');
+        remove_required('id_interest')
+        no_hidden_par('id_bank');
+        add_required('id_bank_rate')
+        select_da(interest_ra);
+    };
 }
 
 
-function select_da() {
+function select_da(interest_ra) {
     const sel = document.getElementById('id_bank').value;
-    select_bank();
+    select_bank(interest_ra);
 };
 
 
 // 金利タイプの選択
-function select_bank () {
+function select_bank (interest_ra) {
     no_hidden_par('id_bank_rate')
     remove_chi('id_bank_rate');
     let name = document.getElementById('id_bank').value;
     let bank = info.find((v) => v.bank_id === name);
-    let option = `<option value="" selected="">---------</option>`
+    let option
+    console.log(interest_ra)
+    if (interest_ra) {
+        interest_ra = parseFloat(interest_ra)
+        option += `<option value="${interest_ra}" selected="">${interest_ra}%</option>`
+    } else {
+
+    };
     for ( let n in order) {
         for (let i in bank ){
             if ( i === 'bank_name' | bank[i] === 0 ){
@@ -73,4 +97,4 @@ function select_bank () {
         };
     };
     document.getElementById('id_bank_rate').insertAdjacentHTML('afterbegin', option);
-    }
+};

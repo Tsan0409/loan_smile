@@ -4,7 +4,7 @@
 
 {% block contents %}
 
-    <h1 class="content-head">借入可能額</h1>
+    <h1 class="content-head">月々の支払い例</h1>
     <p class="contents-ex">必要事項を入力してください</p>
         <form action="" method="post" id="form" class="form">
             {% csrf_token %}
@@ -26,7 +26,7 @@
                         金利情報
                     </th>
                     <td class="form-text">
-                        <select name="bank_rate" class="select_radio" id="id_bank_rate">
+                        <select name="bank_rate" class="select_radio" id="id_bank_rate" required>
                         </select>
                     </td>
                 </tr>
@@ -34,18 +34,54 @@
             <button type="submit" onclick="create_answer()">計算</button>
         </form>
 
-        {% if borrowable is not None %}
+        {% if borrow is not None %}
 
-        <table id="ans" >
-            <tr>
-                <th>借入可能額</th>
-                <td>
-                    <span  class="answer">
-                        {{ borrowable }}
-                    </span> 円
-                </td>
-            </tr>
-        </table>
+        <div id="ans">
+            <table>
+                <tr>
+                    <th>借入額</th>
+                    <td><span  class="answer">{{ borrow }}</span>万円</td>
+                </tr>
+                <tr>
+                    <th>月々の支払い</th>
+                    <td><span  class="answer">{{ amount_repaid }}</span>円</td>
+                </tr>
+                <tr>
+                    <th>総支払額</th>
+                    <td><span  class="answer">{{ total_repaid }}</span>円</td>
+                </tr>
+                <tr>
+                    <th>うち金利分</th>
+                    <td><span  class="answer">{{ interest }}</span>{円</td>
+                </tr>
+            </table>
+
+
+
+
+
+             <canvas id="myAreaChart"></canvas>
+
+
+            <table class="big-table">
+                <tr class="thead">
+                    <th class="table-head">返済月</th>
+                    <th class="table-head">毎月の返済額</th>
+                    <th class="table-head">利息部分</th>
+                    <th class="table-head">元本部分</th>
+                    <th class="table-head">借入残高</th>
+                </tr>
+                {% for key,value in data.items %}
+                <tr>
+                    <td  class="table-data">{{ value.0 }}</td>
+                    <td data-label="毎月の返済額" class="table-data">{{ value.1 }}円</td>
+                    <td data-label="利息" class="table-data">{{ value.2}}円</td>
+                    <td data-label="元本部分" class="table-data">{{ value.3}}円</td>
+                    <td data-label="借入残高" class="table-data">{{ value.4}}円</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
 
         {% endif %}
 
@@ -54,7 +90,7 @@
 
 {% block footer_script %}
 
-
+const interest_ra = '{{ interest_rate | safe }}'
 
 const info = {{ BankInfo | safe }}
 
@@ -64,7 +100,69 @@ on_radio()
 
 
 
+if (interest_ra) {
+    create_graph();
+} else {
+};
 
+function create_graph() {
+    const js = {{ js_data | safe }}
+    console.log(js)
+    const month = js.shift();
+    const interest = js.shift();
+    const principal = js.shift();
+    const total_repaid = js.shift();
+    var ctx = document.getElementById("myAreaChart");
+    console.log(ctx)
+    var myAreaChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: month,
+            datasets: [
+                //データセット0 設定
+                {
+                    fill: 'origin', //'origin'まで塗る
+                    label: '元金',
+                    data: principal,
+                    lineTension:0,
+                    borderColor: "rgba(199,21,133,1)", //ミディアムバイオレット
+                    backgroundColor: "rgba(199,21,133,0.5)"
+                },
+                // データセット1 設定
+                {
+                    fill: 0, // データセット0まで塗る
+                    label: '利息',
+                    data: interest,
+                    lineTension:0,
+                    borderColor: "rgba(255,243,82,1)", //レモンイエロー
+                    backgroundColor: "rgba(255,243,82,0.5)"
+                },
+
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: '支払い割合'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        stepSize: 50000
+                    },
+                    stacked: true,
+                }]
+            },
+            plugins: {
+                filler: {
+                    propagate: true
+                }
+            }
+
+        }
+    });
+};
 
 
 {% endblock  %}

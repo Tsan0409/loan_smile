@@ -4,6 +4,10 @@
 
 {% block contents %}
 
+    {% for error in form.non_field_errors %}
+        {{ error }}
+    {% endfor %}
+
     <h1 class="content-head">借入可能額</h1>
     <p class="contents-ex">必要事項を入力してください</p>
         <form action="" method="post" id="form" class="form">
@@ -26,12 +30,12 @@
                         金利情報
                     </th>
                     <td class="form-text">
-                        <select name="bank_rate" class="select_radio" id="id_bank_rate">
+                        <select name="bank_rate" class="select_radio" id="id_bank_rate" required>
                         </select>
                     </td>
                 </tr>
             </table>
-            <button type="submit" onclick="create_answer()">計算</button>
+            <button type="submit" >計算</button>
         </form>
 
         {% if borrowable is not None %}
@@ -54,7 +58,7 @@
 
 {% block footer_script %}
 
-
+let interest_ra = '{{ interest_rate | safe }}'
 
 const info = {{ BankInfo | safe }}
 

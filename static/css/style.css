@@ -313,19 +313,26 @@ td {
     box-shadow: 0 0 0 2px rgb(33, 150, 243) inset;
 }
 
-.select-radio {
+.select_radio {
     padding: 0rem;
-    display: flex;
-    width:70%;
-    justify-content:space-between;
+    max-width:60%;
+    display:flex;
 }
 
-#id_select input {
+.select_radio div {
+    width: 50%;
+}
+
+.select_radio label {
+    padding: 1rem;
+    width: 12rem;
+    display:flex;
+}
+
+.select_radio input {
+    position: relative;
+    top: 0.3rem;
     width: 1rem;
-}
-
-.radio-text {
-margin-right: 2rem;
 }
 
 
@@ -406,7 +413,10 @@ footer a:hover {
     padding: 1rem;
 }
 
-
+/* Chart.js */
+#myAreaChart {
+    width: 80%;
+}
 
 
 @media (max-width: 600px) {
@@ -477,7 +487,7 @@ footer a:hover {
 .form th {
     text-align: left;
     width:80%;
-    padding: 0.5rem 0.5rem 0.5rem 10%;
+    padding: 0.5rem 0rem 0.5rem 10%;
     margin: 0.5rem auto ;
 
 }
@@ -492,32 +502,53 @@ footer a:hover {
 
 .form-text {
     min-width: 200px;
-
+    padding-left: 0rem;
 }
 
 .no-head {
     display: none;
 }
 
+.form-text {
+    width: 80%;
+}
+
+.form-text input {
+    width: 80%;
+}
+
+.form-text select {
+    width: 80%;
+}
 
 
 /* ラジオボタン */
 
 .select_radio {
-    display: flex;
+    width:80%;
     justify-content:space-between;
-}
-
-.radio_label {
-    margin-bottom: 0.5rem;
-
-}
-
-.radio_form {
     display: flex;
     flex-direction: column;
 }
 
+
+.select_radio div {
+    display: flex;
+    flex-direction: column;
+}
+
+.select_radio label {
+    vertical-align: middle;
+    width: 15rem;
+    padding: 0.25rem;
+    display:flex;
+}
+
+.select_radio input {
+    vertical-align: middle;
+    padding: 1rem;
+    width: 1rem;
+}
 
 /* テーブル操作 */
 

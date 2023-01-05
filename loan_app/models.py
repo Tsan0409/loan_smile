@@ -2,10 +2,13 @@ from accounts.models import CustomUser
 from django.db import models
 
 
-# サンプル
-# class Post(models.Model):
-#     title = models.CharField(max_length=255)
-#     body = models.TextField()
+from django.db import models
+from django.apps import AppConfig
+
+
+class MyAppConfig(AppConfig):
+    default_auto_field = 'django.db.models.AutoField'
+    name = 'my_app'
 
 
 class Bank(models.Model):
@@ -49,8 +52,8 @@ class InterestRate(models.Model):
 
 
 class Option(models.Model):
-    option_id = models.CharField(verbose_name='オプションid', primary_key=True,
-                                 max_length=8)
+    option_id = models.AutoField(verbose_name='オプションid', primary_key=True,
+                                 unique=True,)
     bank_id = models.ForeignKey(Bank, verbose_name='銀行id',
                                 on_delete=models.CASCADE)
     option_name = models.CharField(verbose_name='オプション名', max_length=30)

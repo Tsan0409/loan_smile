@@ -80,16 +80,20 @@ WSGI_APPLICATION = "loan_smile.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "loan_app",
+        "NAME": "loan_smile",
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': '',
         'PORT': '',
     }
 }
+
+
 
 
 # Password validation

@@ -31,7 +31,7 @@ class InterestRate(models.Model):
     floating = models.FloatField(verbose_name='変動金利型', default=0.0)
     fixed_1 = models.FloatField(verbose_name='固定金利選択型01年', default=0.0)
     fixed_2 = models.FloatField(verbose_name='固定金利選択型02年', default=0.0)
-    fixed_3 = models.FloatField(verbose_name='固定金利選択型05年', default=0.0)
+    fixed_3 = models.FloatField(verbose_name='固定金利選択型03年', default=0.0)
     fixed_5 = models.FloatField(verbose_name='固定金利選択型05年', default=0.0)
     fixed_7 = models.FloatField(verbose_name='固定金利選択型07年', default=0.0)
     fixed_10 = models.FloatField(verbose_name='固定金利選択型10年', default=0.0)

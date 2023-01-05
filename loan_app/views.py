@@ -97,20 +97,6 @@ class SampleView(generic.FormView, LoginRequiredMixin):
         return kwgs
 
 
-# サンプル(form)アップデートで使うであろう
-class SamplebView(generic.ListView, LoginRequiredMixin):
-    model = Bank
-    template_name = 'sampleB.html'
-
-    def get_queryset(self):
-        print(f'{self.request.user.is_authenticated}')
-        if not self.request.user.is_authenticated:
-            user_name = '1'
-        else:
-            user_name = self.request.user
-        interest = InterestRate.objects.all().select_related('bank_id').filter(bank_id__user_id=user_name)
-        return interest
-
 
 
 class InquiryView(generic.FormView):
@@ -135,22 +121,29 @@ class BorrowAbleView(generic.FormView, LoginRequiredMixin):
     # 計算処理
     def form_valid(self, form):
         data = form.cleaned_data
+        print(1)
         income = data['income']
         repayment_ratio = data['repayment_ratio']
         debt = data['debt']
         year = data['year']
         select = data['select']
+        print(2)
         if select == '0':
             interest_rate = data['interest']
+            print(3)
         else:
+            print(4)
             interest_rate = float(self.request.POST['bank_rate'])
         if interest_rate == 0 or interest_rate is None:
+            print(5)
             interest_rate = 0
             ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
             return self.render_to_response(ctxt)
+        print(6)
         million_per = self.million_per(interest_rate, year)
         borrowable = self.com(self.borrowable(income, repayment_ratio, debt, million_per))
         ctxt = self.get_context_data(interest_rate=interest_rate, borrowable=borrowable, form=form)
+        print(7)
         return self.render_to_response(ctxt)
 
     # フォームにデータを送る
@@ -582,7 +575,7 @@ class ChangeInterestView(generic.UpdateView, LoginRequiredMixin):
 
     form_class = ChangeInterestForm
     model = InterestRate
-    template_name = 'create_interest.html'
+    template_name = 'change_interest.html'
 
     def get_success_url(self):
         return reverse_lazy('loan_app:index')
@@ -594,3 +587,40 @@ class ChangeInterestView(generic.UpdateView, LoginRequiredMixin):
     def form_invalid(self, form):
         messages.error(self.request, '金利情報を変更できませんでした')
         return super().form_invalid(form)
+
+
+class DeleteBankView(generic.FormView, LoginRequiredMixin):
+
+    form_class = ChoiceBankForm
+    model = Bank
+    template_name = 'delete_bank.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:delete_confirm', kwargs={'pk': int(self.request.POST['bank'])})
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwgs = super().get_form_kwargs(*args, **kwargs)
+        user_name = self.get_userid()
+        kwgs["user"] = user_name
+        return kwgs
+
+    # ユーザー分
+    def get_userid(self):
+        if not self.request.user.is_authenticated:
+            user_name = '1'
+        else:
+            user_name = self.request.user
+        return user_name
+
+
+class DeleteConfirmView(LoginRequiredMixin, generic.DeleteView):
+
+    model = Bank
+    template_name = 'delete_confirm.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:index')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, '銀行データを削除しました')
+        return super().delete(request, *args, **kwargs)

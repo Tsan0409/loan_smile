@@ -8,8 +8,8 @@
         {{ error }}
     {% endfor %}
 
-    <h1 class="content-head">金利情報の変更</h1>
-    <p class="contents-ex">変更する銀行を選択してください</p>
+    <h1 class="content-head">金利を変更</h1>
+    <p class="contents-ex">金利を変更する銀行を選択してください</p>
         <form method="post" id="form" class="form" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -27,7 +27,7 @@
                 {% endfor %}
 
             </table>
-            <button type="submit">次へ</button>
+            <button type="submit">変更</button>
         </form>
 
 

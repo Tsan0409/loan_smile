@@ -8,9 +8,8 @@
         {{ error }}
     {% endfor %}
 
-    <h1 class="content-head">金融機関の登録</h1>
-    <p class="contents-ex">必要事項を入力してください</p>
-    <p class="contents-ex">該当するデータがない場合は0を入力してください</p>
+    <h1 class="content-head">銀行を削除</h1>
+    <p class="contents-ex">削除する銀行を選択してください</p>
         <form method="post" id="form" class="form" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -29,12 +28,8 @@
 
             </table>
 
-            {{ formset.management_form }}
-            {% for file_form in formset %}
-                {{ file_form.as_p }}
-            <hr>
-            {% endfor %}
-            <button type="submit">登録</button>
+            <button type="submit">削除</button>
+
         </form>
 
 

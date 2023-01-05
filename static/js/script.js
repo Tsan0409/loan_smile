@@ -26,7 +26,6 @@ function hidden(id_name) {
 
 // 隠した要素を戻す（class=hidden)
 function no_hidden(id_name) {
-    console.log('no_hidden')
     document.getElementById(id_name).classList.remove('hidden');
 };
 
@@ -34,7 +33,6 @@ function no_hidden(id_name) {
 
 function add_required (id_name) {
     const doc = document.getElementById(id_name);
-    console.log(doc);
     doc.required;
 };
 
@@ -77,15 +75,13 @@ function select_da(interest_ra) {
 function select_bank (interest_ra) {
     no_hidden_par('id_bank_rate')
     remove_chi('id_bank_rate');
-    let name = document.getElementById('id_bank').value;
-    let bank = info.find((v) => v.bank_id === name);
-    let option
-    console.log(interest_ra)
+    let name = Number(document.getElementById('id_bank').value);
+    let bank = info.find( v => v.bank_id === name);
+    let option;
     if (interest_ra) {
         interest_ra = parseFloat(interest_ra)
         option += `<option value="${interest_ra}" selected="">${interest_ra}%</option>`
     } else {
-
     };
     for ( let n in order) {
         for (let i in bank ){
@@ -96,5 +92,6 @@ function select_bank (interest_ra) {
             };
         };
     };
+
     document.getElementById('id_bank_rate').insertAdjacentHTML('afterbegin', option);
 };

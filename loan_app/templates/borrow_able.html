@@ -35,11 +35,11 @@
                     </td>
                 </tr>
             </table>
-            <button type="submit" >計算</button>
+            <button type="submit" onclick="create_answer()">計算</button>
         </form>
 
-        {% if borrowable is not None %}
 
+        {% if borrowable is not None %}
         <table id="ans" >
             <tr>
                 <th>借入可能額</th>
@@ -50,15 +50,15 @@
                 </td>
             </tr>
         </table>
-
         {% endif %}
+
 
 
 {% endblock %}
 
 {% block footer_script %}
 
-let interest_ra = '{{ interest_rate | safe }}'
+const interest_ra = '{{ interest_rate | safe }}'
 
 const info = {{ BankInfo | safe }}
 

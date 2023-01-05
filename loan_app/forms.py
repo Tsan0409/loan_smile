@@ -89,6 +89,7 @@ class SampleForm(forms.Form):
 
 
 class BorrowAbleForm(forms.Form):
+
     user_name = None
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
@@ -96,11 +97,11 @@ class BorrowAbleForm(forms.Form):
     income = forms.IntegerField(label='年収')
     repayment_ratio = forms.IntegerField(label='借入比率')
     debt = forms.IntegerField(label='負債')
-    year = forms.IntegerField(label=' 年数', min_value=1)
+    year = forms.IntegerField(label=' 年数', min_value=1, max_value=50)
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', min_value=0.01)
+    interest = forms.FloatField(label='金利', min_value=0.01, required=False)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
@@ -134,22 +135,22 @@ class BorrowAbleForm(forms.Form):
 
 
 class RequiredIncomeForm(forms.Form):
+
     user_name = None
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
 
     borrow = forms.IntegerField(label='借入額')
     repayment_ratio = forms.IntegerField(label='借入比率')
-    year = forms.IntegerField(label=' 年数', min_value=1)
+    year = forms.IntegerField(label=' 年数', min_value=1, max_value=50)
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利',
-                                min_value=0.01)
+    interest = forms.FloatField(label='金利', required=False, min_value=0.01)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
-                                          'onchange': "select_da(interest_ra)"}),
+                                          'onchange': "select_da(interest_ra);"}),
                                   label='銀行名')
 
     def __init__(self, user=None, *args, **kwargs):
@@ -176,7 +177,7 @@ class RepaidForm(forms.Form):
     CHOICE_TYPE = [('0', '元利均等返済'),
                    ('1', '元金均等返済'), ]
     borrow = forms.IntegerField(label='借入額')
-    year = forms.IntegerField(label=' 年数', min_value=1)
+    year = forms.IntegerField(label=' 年数', min_value=1, max_value=50)
     repaid_type = forms.ChoiceField(label='返済タイプ', choices=CHOICE_TYPE,
                                     initial=0,
                                     widget=forms.RadioSelect())
@@ -226,37 +227,22 @@ class CreateInterestForm(forms.Form):
     fix_30to35 = forms.FloatField(label='全期間固定金利型31〜35年', min_value=0)
 
     def save(self, user_name):
-
         data = self.cleaned_data
-        print(data)
         bank = Bank(bank_name=data['bank_name'], user_id=user_name)
         bank.save()
-        print(bank.bank_id)
-        a = Bank.objects.all()
-        print(f'a{a}')
-        b = Bank.objects.all().filter(bank_id=4, bank_name=data['bank_name'], user_id=user_name)
-        print(f'b{b}')
+        bank_id = Bank.objects.get(bank_name=data['bank_name'], user_id=user_name)
+        interest = InterestRate(bank_id=bank_id, floating=data['floating'],
+                                fixed_1=data['fixed_1'], fixed_2=data['fixed_2'],
+                                fixed_3=data['fixed_3'], fixed_5=data['fixed_5'],
+                                fixed_7=data['fixed_7'], fixed_10=data['fixed_10'],
+                                fixed_15=data['fixed_15'], fixed_20=data['fixed_20'],
+                                fixed_30=data['fixed_30'], fix_10to15=data['fix_10to15'],
+                                fix_15to20=data['fix_15to20'], fix_20to25=data['fix_20to25'],
+                                fix_25to30=data['fix_25to30'], fix_30to35=data['fix_30to35']
+                                )
+        interest.save()
 
-        c = Bank.objects.get(bank_name=data['bank_name'], user_id=user_name)
-        print(f'c{c.bank_name}')
-        print(f'c{c.bank_id}')
-
-        # interest = InterestRate(bank_id=InterestRate.bank_id_id, floating=data['floating'],
-        #                         fixed_1=data['fixed_1'], fixed_2=data['fixed_2'],
-        #                         fixed_3=data['fixed_3'], fixed_5=data['fixed_5'],
-        #                         fixed_7=data['fixed_7'], fixed_10=data['fixed_10'],
-        #                         fixed_15=data['fixed_15'], fixed_20=data['fixed_20'],
-        #                         fixed_30=data['fixed_30'], fix_10to15=data['fix_10to15'],
-        #                         fix_15to20=data['fix_15to20'], fix_20to25=data['fix_20to25'],
-        #                         fix_25to30=data['fix_25to30'], fix_30to35=data['fix_30to35']
-        #                         )
-        # interest.save()
-        print(bank)
-
-    def save_interest(self, bank_id):
-        return
-
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Classの付与
@@ -287,9 +273,9 @@ class ChangeInterestForm(forms.ModelForm):
     class Meta:
         model = InterestRate
         fields = (
-            'floating', 'fixed_1', 'fixed_2', 'fixed_3', 'fixed_5', 'fixed_7',
-            'fixed_10',
-            'fixed_15', 'fixed_20', 'fixed_30', 'fix_10to15', 'fix_15to20',
+            'floating', 'fixed_1', 'fixed_2', 'fixed_3',
+            'fixed_5', 'fixed_7', 'fixed_10', 'fixed_15',
+            'fixed_20', 'fixed_30', 'fix_10to15', 'fix_15to20',
             'fix_20to25', 'fix_25to30', 'fix_30to35'
         )
 
@@ -299,9 +285,3 @@ class ChangeInterestForm(forms.ModelForm):
         # Classの付与
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-text'
-
-# fields=[
-#     'bank_name',
-#     'floating', 'fixed_1', 'fixed_2', 'fixed_3', 'fixed_5', 'fixed_7',
-#     'fixed_10', 'fixed_15', 'fixed_20', 'fixed_30', 'fix_10to15',
-#     'fix_15to20', 'fix_20to25', 'fix_25to30', 'fix_30to35',]

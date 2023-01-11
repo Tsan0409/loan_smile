@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block contents %}
+
+    {% for error in form.non_field_errors %}
+        {{ error }}
+    {% endfor %}
+
+    <h1 class="content-head">金利を比較</h1>
+    <p class="contents-ex">金利のタイプを選択してください</p>
+        <form method="post" id="form" class="form">
+            {% csrf_token %}
+
+            <table>
+
+                {% for field in form %}
+                <tr>
+                    <th>
+                        {{ field.label }}
+                    </th>
+                    <td class="form-text">
+                        {{ field }}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </table>
+
+            <button type="submit" onclick="create_answer">決定</button>
+
+        </form>
+
+    {% if interest_rate is not None %}
+
+        <div id="ans">
+
+            <table class="big-table">
+                <tr class="thead">
+                    <th class="table-head">金融機関</th>
+                    <th class="table-head">金利</th>
+                    <th class="table-head">返済額(借入額：3000万円、借入年数：35年)</th>
+                </tr>
+                {% for i in interest_rate %}
+                {% if i.interest == 0 %}
+                {% else %}
+                <tr>
+
+                    <td  class="table-data">{{ i.bank_id_id__bank_name  }}</td>
+                    <td data-label="金利" class="table-data">{{ i.interest }}％</td>
+                    <td data-label="100万円あたりの利息" class="table-data">{{ i.paid }}円</td>
+                </tr>
+                {% endif %}
+
+                {% endfor %}
+            </table>
+        </div>
+
+    {% endif %}
+
+{% endblock %}
+
+{% block footer_script %}
+
+
+
+{% endblock  %}

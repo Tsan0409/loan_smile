@@ -94,14 +94,14 @@ class BorrowAbleForm(forms.Form):
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
 
-    income = forms.IntegerField(label='年収')
-    repayment_ratio = forms.IntegerField(label='借入比率')
-    debt = forms.IntegerField(label='負債')
-    year = forms.IntegerField(label=' 年数', min_value=1, max_value=50)
-    select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
+    income = forms.IntegerField(label='年収　(万円)')
+    repayment_ratio = forms.IntegerField(label='借入比率　　(%)')
+    debt = forms.IntegerField(label='負債　　(円)')
+    year = forms.IntegerField(label='年数　　　　', min_value=1, max_value=50)
+    select = forms.ChoiceField(label='属性　　　　', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', min_value=0.01, required=False)
+    interest = forms.FloatField(label='金利　　(%)', min_value=0.01, required=False)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
@@ -121,14 +121,11 @@ class BorrowAbleForm(forms.Form):
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
+            'user_id').filter(user_id__in=user)
 
     def clean(self):
         data = super().clean()
-        print(data)
-        # 途中でエラーを起こすz
         radio = data['select']
-        print(radio)
         if radio == '1':
             data[4] = 0
         return data
@@ -166,7 +163,7 @@ class RequiredIncomeForm(forms.Form):
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
+            'user_id').filter(user_id__in=user)
 
 
 class RepaidForm(forms.Form):
@@ -204,7 +201,33 @@ class RepaidForm(forms.Form):
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
+            'user_id').filter(user_id__in=user)
+
+
+class CompareInterestForm(forms.Form):
+
+    CHOICE_REPAID = [
+        ('floating', '変動金利型'),
+        ('fixed_1',  '固定金利選択型01年'),
+        ('fixed_2',  '固定金利選択型02年'),
+        ('fixed_3',  '固定金利選択型03年'),
+        ('fixed_5',  '固定金利選択型05年'),
+        ('fixed_7',  '固定金利選択型07年'),
+        ('fixed_10', '固定金利選択型10年'),
+        ('fixed_15', '固定金利選択型15年'),
+        ('fixed_20', '固定金利選択型20年'),
+        ('fixed_30', '固定金利選択型30年'),
+        ('fix_10to15','全期間固定金利型11〜15年'),
+        ('fix_15to20', '全期間固定金利型16〜20年'),
+        ('fix_20to25', '全期間固定金利型21〜25年'),
+        ('fix_25to30', '全期間固定金利型26〜30年'),
+        ('fix_30to35', '全期間固定金利型31〜35年'),
+    ]
+
+    select = forms.ChoiceField(label='属性', choices=CHOICE_REPAID,
+                               widget=forms.widgets.Select(
+                                   attrs={'class': 'form-text'}
+                               ))
 
 
 class CreateInterestForm(forms.Form):
@@ -213,7 +236,7 @@ class CreateInterestForm(forms.Form):
     floating = forms.FloatField(label='変動金利型', min_value=0)
     fixed_1 = forms.FloatField(label='固定金利選択型01年', min_value=0)
     fixed_2 = forms.FloatField(label='固定金利選択型02年', min_value=0)
-    fixed_3 = forms.FloatField(label='固定金利選択型05年', min_value=0)
+    fixed_3 = forms.FloatField(label='固定金利選択型03年', min_value=0)
     fixed_5 = forms.FloatField(label='固定金利選択型05年', min_value=0)
     fixed_7 = forms.FloatField(label='固定金利選択型07年', min_value=0)
     fixed_10 = forms.FloatField(label='固定金利選択型10年', min_value=0)

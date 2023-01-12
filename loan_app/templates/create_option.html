@@ -8,8 +8,8 @@
         {{ error }}
     {% endfor %}
 
-    <h1 class="content-head">銀行を削除</h1>
-    <p class="contents-ex">削除する銀行を選択してください</p>
+    <h1 class="content-head">オプションを追加する</h1>
+    <p class="contents-ex">オプションを追加する銀行を選択してください</p>
         <form method="post" id="form" class="form" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -27,9 +27,7 @@
                 {% endfor %}
 
             </table>
-
-            <button type="submit">削除</button>
-
+            <button type="submit" name="change">追加</button>
         </form>
 
 

@@ -15,6 +15,9 @@ urlpatterns = [
     path('create_interest/', views.CreateInterestView.as_view(), name='create_interest'),
     path('choice_bank/', views.ChoiceBankView.as_view(), name='choice_bank'),
     path('change_interest/<int:pk>/', views.ChangeInterestView.as_view(), name='change_interest'),
-    path('delete_bank/', views.DeleteBankView.as_view(), name='delete_bank'),
-    path('delete_confirm/<int:pk>/', views.DeleteConfirmView.as_view(), name='delete_confirm'),
+    path('delete_bank/<int:pk>/', views.DeleteBankView.as_view(), name='delete_bank'),
+    path('create_option/', views.CreateOptionView.as_view(), name='create_option'),
+    path('choice_option/', views.ChoiceOptionView.as_view(), name='choice_option'),
+    path('change_option/<int:pk>/', views.ChangeOptionView.as_view(), name='change_option'),
+    path('delete_option/<int:pk>', views.DeleteOptionView.as_view(), name='delete_option'),
     ]

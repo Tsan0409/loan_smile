@@ -34,6 +34,16 @@
                         </select>
                     </td>
                 </tr>
+                <tr>
+                    <th>
+                        オプション
+                    </th>
+                    <td class="form-text">
+                        <select name="bank_option" class="select_radio" id="id_bank_option" required>
+                            <option value="0"> --------- </option>
+                        </select>
+                    </td>
+                </tr>
             </table>
             <button type="submit" onclick="create_answer()">計算</button>
         </form>
@@ -59,7 +69,9 @@
 {% block footer_script %}
 
 const interest_ra = '{{ interest_rate | safe }}'
+const option_return = '{{ option_rate | safe }}'
 
+const opt = {{ BankOption | safe }}
 const info = {{ BankInfo | safe }}
 
 const order = ['変動金利型','固定金利選択型01年','固定金利選択型02年','固定金利選択型03年','固定金利選択型05年','固定金利選択型07年','固定金利選択型10年','固定金利選択型15年','固定金利選択型20年','固定金利選択型30年','全期間固定金利型11〜15年','全期間固定金利型16〜20年','全期間固定金利型21〜25年','全期間固定金利型26〜30年','全期間固定金利型31〜35年']

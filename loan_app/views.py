@@ -3,7 +3,7 @@ import logging
 import params as params
 import requests
 from django.core import serializers
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from django.urls import reverse_lazy
 from django.views import generic
@@ -14,12 +14,13 @@ from django.http.response import JsonResponse
 
 from .forms import InquiryForm, SampleForm, BorrowAbleForm,\
     RequiredIncomeForm, RepaidForm, CreateInterestForm,\
-    ChangeInterestForm, ChoiceBankForm, CompareInterestForm
+    ChangeInterestForm, ChoiceBankForm, CompareInterestForm, \
+    CreateOptionForm, ChoiceOptionForm, ChangeOptionForm
 from .models import Bank, InterestRate, Option
 from .modules import module
 
-
 import pandas as pd
+from decimal import Decimal
 
 
 logger = logging.getLogger(__name__)
@@ -123,16 +124,16 @@ class BorrowAbleView(generic.FormView, LoginRequiredMixin):
         year = data['year']
         select = data['select']
         if select == '0':
-            interest_rate = data['interest']
+            interest_rate = float(Decimal(data['interest']))
+            option_rate = 0
+            sum_rate = interest_rate
         else:
-            interest_rate = float(self.request.POST['bank_rate'])
-        if interest_rate == 0 or interest_rate is None:
-            interest_rate = 0
-            ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
-            return self.render_to_response(ctxt)
-        million_per = module.per_million(interest_rate, year)
+            interest_rate = Decimal(self.request.POST['bank_rate'])
+            option_rate = Decimal(self.request.POST['bank_option'])
+            sum_rate = float(interest_rate + option_rate)
+        million_per = module.per_million(sum_rate, year)
         borrowable = module.com(module.borrowable(income, repayment_ratio, debt, million_per))
-        ctxt = self.get_context_data(interest_rate=interest_rate, borrowable=borrowable, form=form)
+        ctxt = self.get_context_data(interest_rate=interest_rate, borrowable=borrowable, option_rate=option_rate,  form=form)
         return self.render_to_response(ctxt)
 
     # フォームにデータを送る
@@ -140,6 +141,8 @@ class BorrowAbleView(generic.FormView, LoginRequiredMixin):
         context = super().get_context_data(**kwargs)
         bank_info = self.get_bank_info()
         context['BankInfo'] = bank_info
+        bank_option = self.get_bank_option()
+        context['BankOption'] = bank_option
         return context
 
     # ログイン情報をform.pyに送る
@@ -153,9 +156,15 @@ class BorrowAbleView(generic.FormView, LoginRequiredMixin):
     def get_bank_info(self):
         user_name = self.get_userid()
         json_encode = InterestRate.objects.all().select_related('bank_id').filter(bank_id__user_id__in=user_name)
-        print(json_encode)
         bank_info = module.create_bank_dict(json_encode)
         return bank_info
+
+    # option_data
+    def get_bank_option(self):
+        user_name = self.get_userid()
+        json_encode = Option.objects.all().select_related('bank_id').filter(bank_id__user_id__in=user_name)
+        bank_option = module.create_option_dict(json_encode)
+        return bank_option
 
     # ユーザー分
     def get_userid(self):
@@ -180,16 +189,16 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
         year = data['year']
         select = data['select']
         if select == '0':
-            interest_rate = data['interest']
+            interest_rate = float(Decimal(data['interest']))
+            option_rate = 0
+            sum_rate = interest_rate
         else:
-            interest_rate = float(self.request.POST['bank_rate'])
-        if interest_rate == 0 or interest_rate is None:
-            interest_rate = 0
-            ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
-            return self.render_to_response(ctxt)
-        per_million = module.per_million(interest_rate, year)
+            interest_rate = Decimal(self.request.POST['bank_rate'])
+            option_rate = Decimal(self.request.POST['bank_option'])
+            sum_rate = float(interest_rate + option_rate)
+        per_million = module.per_million(sum_rate, year)
         required_income = module.com(module.required_income(repayment_ratio, per_million, borrow))
-        ctxt = self.get_context_data(interest_rate=interest_rate, required_income=required_income, form=form)
+        ctxt = self.get_context_data(interest_rate=interest_rate, option_rate=option_rate, required_income=required_income, form=form)
         return self.render_to_response(ctxt)
 
     # フォームにデータを送る
@@ -197,6 +206,8 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
         context = super().get_context_data(**kwargs)
         bank_info = self.get_bank_info()
         context['BankInfo'] = bank_info
+        bank_option = self.get_bank_option()
+        context['BankOption'] = bank_option
         return context
 
     # ログイン情報をform.pyに送る
@@ -214,6 +225,14 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
         bank_info = module.create_bank_dict(json_encode)
         return bank_info
 
+    # option_data
+    def get_bank_option(self):
+        user_name = self.get_userid()
+        json_encode = Option.objects.all().select_related('bank_id').filter(bank_id__user_id__in=user_name)
+        bank_option = module.create_option_dict(json_encode)
+        return bank_option
+
+
     # ユーザー分
     def get_userid(self):
         if not self.request.user.is_authenticated:
@@ -224,7 +243,6 @@ class RequiredIncomeView(generic.FormView, LoginRequiredMixin):
 
 
 class RepaidView(generic.FormView, LoginRequiredMixin):
-
 
     form_class = RepaidForm
     model = InterestRate
@@ -239,17 +257,17 @@ class RepaidView(generic.FormView, LoginRequiredMixin):
         select = data['select']
         repaid_type = data['repaid_type']
         if select == '0':
-            interest_rate = data['interest']
+            interest_rate = float(Decimal(data['interest']))
+            option_rate = 0
+            sum_rate = interest_rate
         else:
-            interest_rate = float(self.request.POST['bank_rate'])
-        if interest_rate == 0 or interest_rate is None:
-            interest_rate = 0
-            ctxt = self.get_context_data(interest_rate=interest_rate, form=form)
-            return self.render_to_response(ctxt)
+            interest_rate = Decimal(self.request.POST['bank_rate'])
+            option_rate = Decimal(self.request.POST['bank_option'])
+            sum_rate = float(interest_rate + option_rate)
         # 元金均等返済方
         if repaid_type == '0':
-            js_data = module.create_Pcsv(borrow, interest_rate, year)
-            amount_repaid = module.cal_paid(borrow, interest_rate, year)
+            js_data = module.create_Pcsv(borrow, sum_rate, year)
+            amount_repaid = module.cal_paid(borrow, sum_rate, year)
             total_repaid = module.total_repaid(amount_repaid, year)
             interest = module.cal_interest(borrow, total_repaid)
             data = self.read('Pdata.csv', year)
@@ -257,15 +275,15 @@ class RepaidView(generic.FormView, LoginRequiredMixin):
             amount_repaid = module.com(amount_repaid)
         # 元利均等返済
         else:
-            js_data = module.create_PIcsv(borrow, interest_rate, year)
+            js_data = module.create_PIcsv(borrow, sum_rate, year)
             data = self.read('PIdata.csv', year)
             # self.csv_to_excel('PIdata.csv')
             amount_repaid = data[0][1]
-            total_repaid = module.total_PIrepaid(interest_rate, borrow, year)
+            total_repaid = module.total_PIrepaid(sum_rate, borrow, year)
             interest = total_repaid - borrow
         ctxt = self.get_context_data(interest_rate=interest_rate, borrow=module.com(borrow), amount_repaid=amount_repaid,
                                      total_repaid=module.com(total_repaid), interest=module.com(interest),
-                                     data=data,  form=form, js_data=js_data)
+                                     option_rate=option_rate, data=data,  form=form, js_data=js_data)
         return self.render_to_response(ctxt)
 
     # templatesにデータを送る
@@ -273,6 +291,8 @@ class RepaidView(generic.FormView, LoginRequiredMixin):
         context = super().get_context_data(**kwargs)
         bank_info = self.get_bank_info()
         context['BankInfo'] = bank_info
+        bank_option = self.get_bank_option()
+        context['BankOption'] = bank_option
         return context
 
     # ログイン情報をform.pyに送る
@@ -289,6 +309,14 @@ class RepaidView(generic.FormView, LoginRequiredMixin):
         print(json_encode)
         bank_info = module.create_bank_dict(json_encode)
         return bank_info
+
+    # option_data
+    def get_bank_option(self):
+        user_name = self.get_userid()
+        json_encode = Option.objects.all().select_related('bank_id').filter(
+            bank_id__user_id__in=user_name)
+        bank_option = module.create_option_dict(json_encode)
+        return bank_option
 
     # ユーザー分
     def get_userid(self):
@@ -386,7 +414,10 @@ class ChoiceBankView(generic.FormView, LoginRequiredMixin):
     template_name = 'choice_bank.html'
 
     def get_success_url(self):
-        return reverse_lazy('loan_app:change_interest', kwargs={'pk': self.request.POST['bank']})
+        if 'delete' in self.request.POST:
+            return reverse_lazy('loan_app:delete_bank', kwargs={'pk': int(self.request.POST['bank'])})
+        else:
+            return reverse_lazy('loan_app:change_interest', kwargs={'pk': self.request.POST['bank']})
 
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs(*args, **kwargs)
@@ -421,14 +452,40 @@ class ChangeInterestView(generic.UpdateView, LoginRequiredMixin):
         return super().form_invalid(form)
 
 
-class DeleteBankView(generic.FormView, LoginRequiredMixin):
+class DeleteBankView(LoginRequiredMixin, generic.DeleteView):
 
-    form_class = ChoiceBankForm
     model = Bank
-    template_name = 'delete_bank.html'
+    template_name = 'delete.html'
 
     def get_success_url(self):
-        return reverse_lazy('loan_app:delete_confirm', kwargs={'pk': int(self.request.POST['bank'])})
+        return reverse_lazy('loan_app:index')
+
+    def form_valid(self, form):
+        messages.success(self.request, '銀行データを削除しました')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, '銀行データを削除できませんでした')
+        return super().form_invalid(form)
+
+
+class CreateOptionView(LoginRequiredMixin, generic.FormView):
+
+    form_class = CreateOptionForm
+    model = Bank
+    template_name = 'create_option.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:index')
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, 'オプションを追加しました')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'オプションを追加できませんでした')
+        return super().form_invalid(form)
 
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs(*args, **kwargs)
@@ -445,14 +502,80 @@ class DeleteBankView(generic.FormView, LoginRequiredMixin):
         return user_name
 
 
-class DeleteConfirmView(LoginRequiredMixin, generic.DeleteView):
+class ChoiceOptionView(generic.FormView, LoginRequiredMixin):
 
+    form_class = ChoiceOptionForm
     model = Bank
-    template_name = 'delete_confirm.html'
+    template_name = 'choice_option.html'
+
+    def get_success_url(self):
+        if 'delete' in self.request.POST:
+            return reverse_lazy('loan_app:delete_option',
+                                kwargs={'pk': self.request.POST.get('bank_option')})
+        else:
+            return reverse_lazy('loan_app:change_option',
+                                kwargs={'pk': self.request.POST.get('bank_option')})
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwgs = super().get_form_kwargs(*args, **kwargs)
+        user_name = self.get_userid()
+        kwgs["user"] = user_name
+        return kwgs
+
+    # ユーザー分
+    def get_userid(self):
+        if not self.request.user.is_authenticated:
+            user_name = '1'
+        else:
+            user_name = self.request.user
+        return user_name
+
+    # フォームにデータを送る
+    def get_context_data(self, **kwargs,):
+        context = super().get_context_data(**kwargs)
+        bank_option = self.get_bank_option()
+        context['BankOption'] = bank_option
+        return context
+
+    # option_data
+    def get_bank_option(self):
+        user_name = self.get_userid()
+        json_encode = Option.objects.all().select_related('bank_id').filter(bank_id__user_id=user_name)
+        bank_option = module.create_option_dict(json_encode)
+        print(bank_option)
+        return bank_option
+
+
+class ChangeOptionView(generic.UpdateView, LoginRequiredMixin):
+
+    form_class = ChangeOptionForm
+    model = Option
+    template_name = 'change_interest.html'
 
     def get_success_url(self):
         return reverse_lazy('loan_app:index')
 
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, '銀行データを削除しました')
-        return super().delete(request, *args, **kwargs)
+    def form_valid(self, form):
+        messages.success(self.request, 'オプションを変更しました')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'オプションを変更できませんでした')
+        return super().form_invalid(form)
+
+
+class DeleteOptionView(LoginRequiredMixin, generic.DeleteView):
+
+    model = Option
+    template_name = 'delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('loan_app:index')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'オプションを削除しました')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'オプションを削除できませんでした')
+        return super().form_invalid(form)

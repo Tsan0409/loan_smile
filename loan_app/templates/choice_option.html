@@ -8,8 +8,8 @@
         {{ error }}
     {% endfor %}
 
-    <h1 class="content-head">金利の変更・削除</h1>
-    <p class="contents-ex">変更・削除する銀行を選択してください</p>
+    <h1 class="content-head">オプションの変更・削除</h1>
+    <p class="contents-ex">変更・削除するオプションを選択してください</p>
         <form method="post" id="form" class="form" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -25,9 +25,20 @@
                     </td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <th>
+                        オプション
+                    </th>
+                    <td class="form-text">
+                        <select name="bank_option" class="select_radio" id="id_bank_option" required>
+                            <option value="0"> --------- </option>
+                        </select>
+                    </td>
+                </tr>
 
             </table>
             <button type="submit" name="change">変更</button>
+            <br>
             <button type="submit" name="delete">削除</button>
         </form>
 
@@ -35,6 +46,11 @@
 {% endblock %}
 
 {% block footer_script %}
+
+const opt = {{ BankOption | safe }}
+const page_type = 'change'
+console.log(opt)
+
 
 
 

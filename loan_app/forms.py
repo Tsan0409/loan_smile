@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Bank, InterestRate
+from .models import Bank, InterestRate, Option
 
 import os
 
@@ -101,7 +101,7 @@ class BorrowAbleForm(forms.Form):
     select = forms.ChoiceField(label='属性　　　　', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利　　(%)', min_value=0.01, required=False)
+    interest = forms.FloatField(label='金利　　(%)', required=False)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
@@ -181,7 +181,7 @@ class RepaidForm(forms.Form):
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', required=False, min_value=0.01)
+    interest = forms.FloatField(label='金利', required=False)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
@@ -217,7 +217,7 @@ class CompareInterestForm(forms.Form):
         ('fixed_15', '固定金利選択型15年'),
         ('fixed_20', '固定金利選択型20年'),
         ('fixed_30', '固定金利選択型30年'),
-        ('fix_10to15','全期間固定金利型11〜15年'),
+        ('fix_10to15', '全期間固定金利型11〜15年'),
         ('fix_15to20', '全期間固定金利型16〜20年'),
         ('fix_20to25', '全期間固定金利型21〜25年'),
         ('fix_25to30', '全期間固定金利型26〜30年'),
@@ -301,6 +301,66 @@ class ChangeInterestForm(forms.ModelForm):
             'fixed_20', 'fixed_30', 'fix_10to15', 'fix_15to20',
             'fix_20to25', 'fix_25to30', 'fix_30to35'
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Classの付与
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-text'
+
+
+class CreateOptionForm(forms.ModelForm):
+
+    bank = forms.ModelChoiceField(queryset=Bank.objects.none(),
+                                  widget=forms.widgets.Select(), label='銀行名')
+
+    class Meta:
+
+        model = Option
+        fields = ('option_name', 'option_rate')
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Classの付与
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-text'
+
+        self.fields['bank'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)
+
+    def save(self, commit=True):
+        data = self.cleaned_data
+        print()
+        option = Option(bank_id=data['bank'], option_name=data['option_name'],
+                        option_rate=data['option_rate'])
+        option.save()
+
+
+class ChoiceOptionForm(forms.Form):
+    bank = forms.ModelChoiceField(queryset=Bank.objects.none(),
+                                  widget=forms.widgets.Select(attrs={
+                                          'onchange': "select_option(page_type);"
+                                  }), label='銀行名')
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs),
+
+        # Classの付与
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-text'
+
+        self.fields['bank'].queryset = Bank.objects.all().select_related(
+            'user_id').filter(user_id=user)
+
+
+class ChangeOptionForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Option
+        fields = ('option_name', 'option_rate')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

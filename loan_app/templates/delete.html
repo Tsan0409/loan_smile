@@ -8,18 +8,18 @@
         {{ error }}
     {% endfor %}
 
-    <h1 class="content-head">金利削除</h1>
+    <h1 class="content-head">データの削除</h1>
 
         <form method="post" id="form" class="form" enctype="multipart/form-data">
+
             {% csrf_token %}
 
             <p class="contents-ex">本当に削除しますか?</p>
 
             <button type="submit">削除</button>
 
-            <br><a href="{% url 'loan_app:choice_bank' %}" class="contents-ex">戻る</a>
-
         </form>
+
 
 
 {% endblock %}

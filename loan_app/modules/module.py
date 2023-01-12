@@ -159,3 +159,13 @@ def create_bank_dict(json_encode):
         }
         bank_info.append(bank_data)
     return bank_info
+
+def create_option_dict(json_encode):
+    bank_option = []
+    for i in json_encode:
+        bank_data = {
+            "bank_id": i.bank_id_id, 'option_name': i.option_name,
+            'option_rate': i.option_rate, 'option_id': i.option_id
+        }
+        bank_option.append(bank_data)
+    return bank_option

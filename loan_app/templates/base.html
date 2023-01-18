@@ -36,9 +36,11 @@
                         </ul></li>
                     <li class="has-menu"><a href="#" class="" >金利情報</a>
                         <ul class="sub-menu">
-                            <li><a href="{% url 'loan_app:compare_interest' %}">ローン情報の比較</a></li>
-                            <li><a href="{% url 'loan_app:create_interest' %}">ローン情報の追加</a></li>
-                            <li><a href="{% url 'loan_app:choice_bank' %}">ローン情報の変更・削除</a></li>
+                            <li><a href="{% url 'loan_app:compare_interest' %}">金利の比較</a></li>
+                            <li><a href="{% url 'loan_app:create_interest' %}">金利の追加</a></li>
+                            <li><a href="{% url 'loan_app:choice_bank' %}">金利の編集</a></li>
+                            <li><a href="{% url 'loan_app:create_option' %}">オプションの追加</a></li>
+                            <li><a href="{% url 'loan_app:choice_option' %}">オプションの編集</a></li>
                         </ul></li>
                     <li class="has-menu"><a href="#">アカウント情報</a>
                         <ul class="sub-menu">
@@ -115,9 +117,11 @@
             <div class="hidden_list">
                 <h4>金利情報</h4>
                 <ul class="hidden">
-                    <li><a href="{% url 'loan_app:compare_interest' %}">ローン情報の比較</a></li>
-                    <li><a href="{% url 'loan_app:create_interest' %}">ローン情報の追加</a></li>
-                    <li><a href="{% url 'loan_app:choice_bank' %}">ローン情報の変更・削除</a></li>
+                    <li><a href="{% url 'loan_app:compare_interest' %}">金利の比較</a></li>
+                    <li><a href="{% url 'loan_app:create_interest' %}">金利の追加</a></li>
+                    <li><a href="{% url 'loan_app:choice_bank' %}">金利の編集</a></li>
+                    <li><a href="{% url 'loan_app:create_option' %}">オプションの追加</a></li>
+                    <li><a href="{% url 'loan_app:choice_option' %}">オプションの編集</a></li>
                 </ul>
             </div>
         </li>

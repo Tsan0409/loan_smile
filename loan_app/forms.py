@@ -37,59 +37,14 @@ class InquiryForm(forms.Form):
         subject = f'お問合せ {title}'
         message = f'送信者名: {name}\nメールアドレス: {email}\nメッセージ:\n{message}'
         from_email = os.environ.get('FROM_EMAIL')
-        to_list = [
-            os.environ.get('FROM_EMAIL')
-        ]
-        cc_list = [
-            email
-        ]
-
+        to_list = [os.environ.get('FROM_EMAIL')]
+        cc_list = [email]
         message = EmailMessage(subject=subject, body=message,
                                from_email=from_email, to=to_list, cc=cc_list)
         message.send()
 
 
-# サンプル
-class SampleForm(forms.Form):
-    CHOICE_RADIO = [
-        ('0', '金利を入力'),
-        ('1', '金融機関から選択'), ]
-
-    user_name = None
-    text = forms.CharField(label='テキスト', widget=forms.Textarea)
-    search = forms.CharField(label='検索')
-    replace = forms.CharField(label='痴漢')
-    select = forms.ChoiceField(label='属性', widget=forms.RadioSelect(
-        attrs={'onchange': "on_radio();"}), choices=CHOICE_RADIO, initial=0)
-    choice = forms.ModelChoiceField(
-        queryset=Bank.objects.none(),
-        required=True,
-        widget=forms.widgets.Select,
-        label='銀行名'
-    )
-
-    def __init__(self, user=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        print(f'form: {user}')
-        print(self.user_name)
-        print(self.fields['choice'])
-        self.fields['choice'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
-
-    def clean(self):
-        data = super().clean()
-        print(data)
-        # 途中でエラーを起こす
-        text = data['text']
-        print(text)
-        if len(text) <= 5:
-            print(ValidationError('error'))
-            raise ValidationError('テキストが短過ぎます。')
-        return data
-
-
 class BorrowAbleForm(forms.Form):
-
     user_name = None
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
@@ -103,9 +58,8 @@ class BorrowAbleForm(forms.Form):
                                    attrs={'onchange': "on_radio();"}))
     interest = forms.FloatField(label='金利　　(%)', required=False)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
-                                  widget=forms.widgets.Select(
-                                      attrs={
-                                          'onchange': "select_da(interest_ra);"}),
+                                  widget=forms.widgets.Select(attrs={
+                                      'onchange': "select_da(interest_ra);"}),
                                   label='銀行名')
 
     def __init__(self, user=None, *args, **kwargs):
@@ -132,7 +86,6 @@ class BorrowAbleForm(forms.Form):
 
 
 class RequiredIncomeForm(forms.Form):
-
     user_name = None
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
@@ -205,14 +158,13 @@ class RepaidForm(forms.Form):
 
 
 class CompareInterestForm(forms.Form):
-
     CHOICE_REPAID = [
         ('floating', '変動金利型'),
-        ('fixed_1',  '固定金利選択型01年'),
-        ('fixed_2',  '固定金利選択型02年'),
-        ('fixed_3',  '固定金利選択型03年'),
-        ('fixed_5',  '固定金利選択型05年'),
-        ('fixed_7',  '固定金利選択型07年'),
+        ('fixed_1', '固定金利選択型01年'),
+        ('fixed_2', '固定金利選択型02年'),
+        ('fixed_3', '固定金利選択型03年'),
+        ('fixed_5', '固定金利選択型05年'),
+        ('fixed_7', '固定金利選択型07年'),
         ('fixed_10', '固定金利選択型10年'),
         ('fixed_15', '固定金利選択型15年'),
         ('fixed_20', '固定金利選択型20年'),
@@ -231,41 +183,60 @@ class CompareInterestForm(forms.Form):
 
 
 class CreateInterestForm(forms.Form):
-
     bank_name = forms.CharField(label='銀行名前')
-    floating = forms.FloatField(label='変動金利型', min_value=0)
-    fixed_1 = forms.FloatField(label='固定金利選択型01年', min_value=0)
-    fixed_2 = forms.FloatField(label='固定金利選択型02年', min_value=0)
-    fixed_3 = forms.FloatField(label='固定金利選択型03年', min_value=0)
-    fixed_5 = forms.FloatField(label='固定金利選択型05年', min_value=0)
-    fixed_7 = forms.FloatField(label='固定金利選択型07年', min_value=0)
-    fixed_10 = forms.FloatField(label='固定金利選択型10年', min_value=0)
-    fixed_15 = forms.FloatField(label='固定金利選択型15年', min_value=0)
-    fixed_20 = forms.FloatField(label='固定金利選択型20年', min_value=0)
-    fixed_30 = forms.FloatField(label='固定金利選択型30年', min_value=0)
-    fix_10to15 = forms.FloatField(label='全期間固定金利型11〜15年', min_value=0)
-    fix_15to20 = forms.FloatField(label='全期間固定金利型16〜20年', min_value=0)
-    fix_20to25 = forms.FloatField(label='全期間固定金利型21〜25年', min_value=0)
-    fix_25to30 = forms.FloatField(label='全期間固定金利型26〜30年', min_value=0)
-    fix_30to35 = forms.FloatField(label='全期間固定金利型31〜35年', min_value=0)
+    floating = forms.FloatField(label='変動金利型',
+                                min_value=0, max_value=25)
+    fixed_1 = forms.FloatField(label='固定金利選択型01年',
+                               min_value=0, max_value=25)
+    fixed_2 = forms.FloatField(label='固定金利選択型02年',
+                               min_value=0, max_value=25)
+    fixed_3 = forms.FloatField(label='固定金利選択型03年',
+                               min_value=0, max_value=25)
+    fixed_5 = forms.FloatField(label='固定金利選択型05年',
+                               min_value=0, max_value=25)
+    fixed_7 = forms.FloatField(label='固定金利選択型07年',
+                               min_value=0, max_value=25)
+    fixed_10 = forms.FloatField(label='固定金利選択型10年',
+                                min_value=0, max_value=25)
+    fixed_15 = forms.FloatField(label='固定金利選択型15年',
+                                min_value=0, max_value=25)
+    fixed_20 = forms.FloatField(label='固定金利選択型20年',
+                                min_value=0, max_value=25)
+    fixed_30 = forms.FloatField(label='固定金利選択型30年',
+                                min_value=0, max_value=25)
+    fix_10to15 = forms.FloatField(label='全期間固定金利型11〜15年',
+                                  min_value=0, max_value=25)
+    fix_15to20 = forms.FloatField(label='全期間固定金利型16〜20年',
+                                  min_value=0, max_value=25)
+    fix_20to25 = forms.FloatField(label='全期間固定金利型21〜25年',
+                                  min_value=0, max_value=25)
+    fix_25to30 = forms.FloatField(label='全期間固定金利型26〜30年',
+                                  min_value=0, max_value=25)
+    fix_30to35 = forms.FloatField(label='全期間固定金利型31〜35年',
+                                  min_value=0, max_value=25)
 
     def save(self, user_name):
         data = self.cleaned_data
         bank = Bank(bank_name=data['bank_name'], user_id=user_name)
         bank.save()
-        bank_id = Bank.objects.get(bank_name=data['bank_name'], user_id=user_name)
-        interest = InterestRate(bank_id=bank_id, floating=data['floating'],
-                                fixed_1=data['fixed_1'], fixed_2=data['fixed_2'],
-                                fixed_3=data['fixed_3'], fixed_5=data['fixed_5'],
-                                fixed_7=data['fixed_7'], fixed_10=data['fixed_10'],
-                                fixed_15=data['fixed_15'], fixed_20=data['fixed_20'],
-                                fixed_30=data['fixed_30'], fix_10to15=data['fix_10to15'],
-                                fix_15to20=data['fix_15to20'], fix_20to25=data['fix_20to25'],
-                                fix_25to30=data['fix_25to30'], fix_30to35=data['fix_30to35']
-                                )
+
+        bank_id = Bank.objects.get(
+            bank_name=data['bank_name'], user_id=user_name
+        )
+        interest = InterestRate(
+            bank_id=bank_id, floating=data['floating'],
+            fixed_1=data['fixed_1'], fixed_2=data['fixed_2'],
+            fixed_3=data['fixed_3'], fixed_5=data['fixed_5'],
+            fixed_7=data['fixed_7'], fixed_10=data['fixed_10'],
+            fixed_15=data['fixed_15'], fixed_20=data['fixed_20'],
+            fixed_30=data['fixed_30'], fix_10to15=data['fix_10to15'],
+            fix_15to20=data['fix_15to20'], fix_20to25=data['fix_20to25'],
+            fix_25to30=data['fix_25to30'], fix_30to35=data['fix_30to35']
+        )
         interest.save()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
+        self.login_user = user
         super().__init__(*args, **kwargs)
 
         # Classの付与
@@ -275,6 +246,28 @@ class CreateInterestForm(forms.Form):
                 field.widget.attrs['class'] = 'select_radio'
             else:
                 field.widget.attrs['class'] = 'form-text'
+
+    # 同じ名前の金融機関を通さない
+    def clean(self):
+        super(CreateInterestForm, self).clean()
+        data = self.cleaned_data
+        user = self.login_user[0]
+        if 'bank_name' in data:
+            if Bank.objects.filter(bank_name=data['bank_name'], user_id=user).exists():
+                self._errors['bank_name'] = self.error_class([
+                    '同じ銀行名は作成できません。'])
+        return self.cleaned_data
+
+        # 1/18
+        # ＃クリーンデータの引き継ぎ方と、
+        # 後付けの昨日やフォームにつけていない
+        # バリデーションは自分でつけなければならない。
+        # エラーテストはただしい結果が出るとリダイレクト先が帰ってきてエラーになる。
+        # モデルフォームに後から、最小値等をつける方法
+        # バリデーションエラーの出し方
+        # selfを使わないバリデーションの付け方
+
+        # self.fields['bank_name'].validators.append(self.clean_bank_name(user))
 
 
 class ChoiceBankForm(forms.Form):
@@ -289,10 +282,10 @@ class ChoiceBankForm(forms.Form):
             field.widget.attrs['class'] = 'form-text'
 
         self.fields['bank'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
+            'user_id').filter(user_id__in=user)
 
 
-class ChangeInterestForm(forms.ModelForm):
+class UpdateInterestForm(forms.ModelForm):
     class Meta:
         model = InterestRate
         fields = (
@@ -305,43 +298,82 @@ class ChangeInterestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Classの付与
+        # 属性の付与
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-text'
+            field.widget.attrs['min'] = 0
+            field.widget.attrs['max'] = 25
+
+    # 関数で付帯したウィジェットは独自バリデーションが施されていないので、自作する必要がある
+    # 最小値と最大値のバリデーション
+    def clean(self):
+        super(UpdateInterestForm, self).clean()
+        data = self.cleaned_data
+        for i in data:
+            if data[i] < 0:
+                self._errors[i] = self.error_class([
+                    'この値は 0 以上でなければなりません。'])
+            if data[i] > 25:
+                self._errors[i] = self.error_class([
+                    'この値は 25 以下でなければなりません。'])
+        return self.cleaned_data
 
 
 class CreateOptionForm(forms.ModelForm):
-
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(),
                                   widget=forms.widgets.Select(), label='銀行名')
 
     class Meta:
-
         model = Option
         fields = ('option_name', 'option_rate')
 
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Classの付与
+        # 属性の付与
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-text'
+        self.fields['option_rate'].widget.attrs['min'] = -25
+        self.fields['option_rate'].widget.attrs['max'] = 25
 
         self.fields['bank'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
+            'user_id').filter(user_id__in=user)
 
     def save(self, commit=True):
         data = self.cleaned_data
-        print()
-        option = Option(bank_id=data['bank'], option_name=data['option_name'],
-                        option_rate=data['option_rate'])
+        option = Option(
+            bank_id=data['bank'], option_name=data['option_name'],
+            option_rate=data['option_rate'])
         option.save()
+
+
+    def clean(self):
+        super(CreateOptionForm, self).clean()
+        data = self.cleaned_data
+
+        # 同じ名前の金融機関を通さない
+        if 'option_name' in data:
+            if Option.objects.filter(option_name=data['option_name'],
+                                     bank_id=data['bank']).exists():
+                self._errors['option_name'] = self.error_class(
+                    ['1つの銀行内に同じ名前のオプションは作成できません。'])
+
+
+        # 最大値、最小値のバリデーション
+        if 'option_rate' in data:
+            if data['option_rate'] < -25:
+                self._errors['option_rate'] = self.error_class([
+                    'この値は -25 以上でなければなりません。'])
+            if data['option_rate'] > 25:
+                self._errors['option_rate'] = self.error_class([
+                    'この値は 25 以下でなければなりません。'])
+        return self.cleaned_data
 
 
 class ChoiceOptionForm(forms.Form):
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(),
                                   widget=forms.widgets.Select(attrs={
-                                          'onchange': "select_option(page_type);"
+                                      'onchange': "select_option(page_type);"
                                   }), label='銀行名')
 
     def __init__(self, user=None, *args, **kwargs):
@@ -352,19 +384,47 @@ class ChoiceOptionForm(forms.Form):
             field.widget.attrs['class'] = 'form-text'
 
         self.fields['bank'].queryset = Bank.objects.all().select_related(
-            'user_id').filter(user_id=user)
+            'user_id').filter(user_id__in=user)
 
 
-class ChangeOptionForm(forms.ModelForm):
+class UpdateOptionForm(forms.ModelForm):
 
     class Meta:
-
         model = Option
         fields = ('option_name', 'option_rate')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, selected_bank, selected_option, *args, **kwargs):
+        self.selected_bank = selected_bank
+        self.selected_option = selected_option
         super().__init__(*args, **kwargs)
 
         # Classの付与
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-text'
+
+        # 最大値、最小値の付与
+        self.fields['option_rate'].widget.attrs['min'] = -25
+        self.fields['option_rate'].widget.attrs['max'] = 25
+
+    def clean(self):
+        super(UpdateOptionForm, self).clean()
+        data = self.cleaned_data
+        bank = self.selected_bank
+        # 同じ名前の金融機関を通さない
+
+        if 'option_name' in data:
+            if Option.objects.exclude(
+                    option_id=self.selected_option).filter(option_name=data['option_name'],
+                                                           bank_id=bank).exists():
+                self._errors['option_name'] = self.error_class(
+                    ['1つの銀行内に同じ名前のオプションは作成できません。'])
+
+        # 最大値、最小値のバリデーション
+        if 'option_rate' in data:
+            if data['option_rate'] < -25:
+                self._errors['option_rate'] = self.error_class([
+                    'この値は -25 以上でなければなりません。'])
+            if data['option_rate'] > 25:
+                self._errors['option_rate'] = self.error_class([
+                    'この値は 25 以下でなければなりません。'])
+        return self.cleaned_data

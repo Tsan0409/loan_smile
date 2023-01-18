@@ -134,7 +134,7 @@ function select_option (page_type) {
         option += `<option value="0"> オプション未登録 </option>`;
     } else {
         if (page_type === 'change') {
-            option += `<option value="0"> --------- </option>`;
+            option += `<option value=""> --------- </option>`;
             for (let i in bank_option ){
                 if ( i === 'bank_name' | bank_option[i] === 0 ){
                 } else {

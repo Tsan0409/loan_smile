@@ -49,40 +49,65 @@ class BorrowAbleForm(forms.Form):
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
 
-    income = forms.IntegerField(label='年収　(万円)')
-    repayment_ratio = forms.IntegerField(label='借入比率　　(%)')
-    debt = forms.IntegerField(label='負債　　(円)')
-    year = forms.IntegerField(label='年数　　　　', min_value=1, max_value=50)
-    select = forms.ChoiceField(label='属性　　　　', choices=CHOICE_RADIO, initial=0,
+    income = forms.IntegerField(label='年収', max_value=100000, min_value=1)
+    repayment_ratio = forms.IntegerField(label='借入比率', max_value=40, min_value=1)
+    debt = forms.IntegerField(label='負債', max_value=1000000, min_value=0)
+    year = forms.IntegerField(label='年数', min_value=1, max_value=50)
+    select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利　　(%)', required=False)
+    interest = forms.FloatField(label='金利', required=False, min_value=0.0001, max_value=25)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(attrs={
                                       'onchange': "select_da(interest_ra);"}),
                                   label='銀行名')
 
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, bank_rate, bank_option, user=None, *args, **kwargs):
+        self.bank_rate = bank_rate
+        self.bank_option = bank_option
         super().__init__(*args, **kwargs)
 
+        PH = {'income': ' 600  (万円)',
+              'repayment_ratio': ' 35  (%)',
+              'debt': ' 20,000  (円/月)',
+              'year': ' 35  (年)',
+              'interest': ' 0.545  (%)'
+              }
+
         # Classの付与
-        for field in self.fields.values():
-            copy = str(field)
+        for field_name, field_value in self.fields.items():
+            copy = str(field_value)
             if 'ChoiceField' in copy:
-                field.widget.attrs['class'] = 'select_radio'
+                field_value.widget.attrs['class'] = 'select_radio'
             else:
-                field.widget.attrs['class'] = 'form-text'
+                field_value.widget.attrs['class'] = 'form-text'
+                field_value.widget.attrs['placeholder'] = PH[f'{field_name}']
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
             'user_id').filter(user_id__in=user)
 
     def clean(self):
-        data = super().clean()
-        radio = data['select']
-        if radio == '1':
-            data[4] = 0
-        return data
+        super(BorrowAbleForm, self).clean()
+        data = self.cleaned_data
+        if data['select'] == '0':
+            if 'interest' in data and data['interest'] is None:
+                data['interest'] = 0
+                self._errors['interest'] = self.error_class([
+                    'このフィールドは必須です。'])
+        else:
+            if self.bank_rate is None:
+                self._errors['bank'] = self.error_class([
+                    '金利が選択されていません。'])
+            elif self.bank_option is None:
+                self._errors['bank'] = self.error_class([
+                    'オプションが選択されていません。'])
+            elif self.bank_option + self.bank_rate <= 0:
+                self._errors['bank'] = self.error_class([
+                    '金利とオプションの合計は 0 以上にしてください。'])
+            data['bank_rate'] = self.bank_rate
+            data['bank_option'] = self.bank_option
+        return self.cleaned_data
 
 
 class RequiredIncomeForm(forms.Form):
@@ -90,33 +115,64 @@ class RequiredIncomeForm(forms.Form):
     CHOICE_RADIO = [('0', '金利を入力'),
                     ('1', '金融機関から選択'), ]
 
-    borrow = forms.IntegerField(label='借入額')
-    repayment_ratio = forms.IntegerField(label='借入比率')
+    borrow = forms.IntegerField(label='借入額', min_value=1, max_value=9999999)
+    repayment_ratio = forms.IntegerField(label='借入比率', min_value=1, max_value=40)
     year = forms.IntegerField(label=' 年数', min_value=1, max_value=50)
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', required=False, min_value=0.01)
+    interest = forms.FloatField(label='金利', required=False, min_value=0.0001, max_value=25)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
                                           'onchange': "select_da(interest_ra);"}),
                                   label='銀行名')
 
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, bank_rate, bank_option, user=None, *args, **kwargs):
+        self.bank_rate = bank_rate
+        self.bank_option = bank_option
         super().__init__(*args, **kwargs)
 
+        PH = {'borrow': ' 3000  (万円)',
+              'repayment_ratio': ' 35  (%)',
+              'year': ' 35  (年)',
+              'interest': ' 0.545  (%)'
+              }
+
         # Classの付与
-        for field in self.fields.values():
-            copy = str(field)
+        for field_name, field_value in self.fields.items():
+            copy = str(field_value)
             if 'ChoiceField' in copy:
-                field.widget.attrs['class'] = 'select_radio'
+                field_value.widget.attrs['class'] = 'select_radio'
             else:
-                field.widget.attrs['class'] = 'form-text'
+                field_value.widget.attrs['class'] = 'form-text'
+                field_value.widget.attrs['placeholder'] = PH[f'{field_name}']
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
             'user_id').filter(user_id__in=user)
+
+    def clean(self):
+        super(RequiredIncomeForm, self).clean()
+        data = self.cleaned_data
+        if data['select'] == '0':
+            if 'interest' in data and data['interest'] is None:
+                data['interest'] = 0
+                self._errors['interest'] = self.error_class([
+                    'このフィールドは必須です。'])
+        else:
+            if self.bank_rate is None:
+                self._errors['bank'] = self.error_class([
+                    '金利が選択されていません。'])
+            elif self.bank_option is None:
+                self._errors['bank'] = self.error_class([
+                    'オプションが選択されていません。'])
+            elif self.bank_option + self.bank_rate <= 0:
+                self._errors['bank'] = self.error_class([
+                    '金利とオプションの合計は 0 以上にしてください。'])
+            data['bank_rate'] = self.bank_rate
+            data['bank_option'] = self.bank_option
+        return self.cleaned_data
 
 
 class RepaidForm(forms.Form):
@@ -126,7 +182,7 @@ class RepaidForm(forms.Form):
 
     CHOICE_TYPE = [('0', '元利均等返済'),
                    ('1', '元金均等返済'), ]
-    borrow = forms.IntegerField(label='借入額')
+    borrow = forms.IntegerField(label='借入額', min_value=1, max_value=9999999)
     year = forms.IntegerField(label=' 年数', min_value=1, max_value=50)
     repaid_type = forms.ChoiceField(label='返済タイプ', choices=CHOICE_TYPE,
                                     initial=0,
@@ -134,27 +190,58 @@ class RepaidForm(forms.Form):
     select = forms.ChoiceField(label='属性', choices=CHOICE_RADIO, initial=0,
                                widget=forms.RadioSelect(
                                    attrs={'onchange': "on_radio();"}))
-    interest = forms.FloatField(label='金利', required=False)
+    interest = forms.FloatField(label='金利', required=False, min_value=0.0001,
+                                max_value=25)
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(), required=False,
                                   widget=forms.widgets.Select(
                                       attrs={
                                           'onchange': "select_da(interest_ra);"}),
                                   label='銀行名')
 
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, bank_rate, bank_option, user=None, *args, **kwargs):
+        self.bank_rate = bank_rate
+        self.bank_option = bank_option
         super().__init__(*args, **kwargs)
 
+        PH = {'borrow': ' 3000  (万円)',
+              'year': ' 35  (年)',
+              'interest': ' 0.545  (%)'
+              }
+
         # Classの付与
-        for field in self.fields.values():
-            copy = str(field)
+        for field_name, field_value in self.fields.items():
+            copy = str(field_value)
             if 'ChoiceField' in copy:
-                field.widget.attrs['class'] = 'select_radio'
+                field_value.widget.attrs['class'] = 'select_radio'
             else:
-                field.widget.attrs['class'] = 'form-text'
+                field_value.widget.attrs['class'] = 'form-text'
+                field_value.widget.attrs['placeholder'] = PH[f'{field_name}']
 
         # ユーザー別の銀行データを渡す
         self.fields['bank'].queryset = Bank.objects.all().select_related(
             'user_id').filter(user_id__in=user)
+
+    def clean(self):
+        super(RepaidForm, self).clean()
+        data = self.cleaned_data
+        if data['select'] == '0':
+            if 'interest' in data and data['interest'] is None:
+                data['interest'] = 0
+                self._errors['interest'] = self.error_class([
+                    'このフィールドは必須です。'])
+        else:
+            if self.bank_rate is None:
+                self._errors['bank'] = self.error_class([
+                    '金利が選択されていません。'])
+            elif self.bank_option is None:
+                self._errors['bank'] = self.error_class([
+                    'オプションが選択されていません。'])
+            elif self.bank_option + self.bank_rate <= 0:
+                self._errors['bank'] = self.error_class([
+                    '金利とオプションの合計は 0 以上にしてください。'])
+            data['bank_rate'] = self.bank_rate
+            data['bank_option'] = self.bank_option
+        return self.cleaned_data
 
 
 class CompareInterestForm(forms.Form):
@@ -257,18 +344,6 @@ class CreateInterestForm(forms.Form):
                 self._errors['bank_name'] = self.error_class([
                     '同じ銀行名は作成できません。'])
         return self.cleaned_data
-
-        # 1/18
-        # ＃クリーンデータの引き継ぎ方と、
-        # 後付けの昨日やフォームにつけていない
-        # バリデーションは自分でつけなければならない。
-        # エラーテストはただしい結果が出るとリダイレクト先が帰ってきてエラーになる。
-        # モデルフォームに後から、最小値等をつける方法
-        # バリデーションエラーの出し方
-        # selfを使わないバリデーションの付け方
-
-        # self.fields['bank_name'].validators.append(self.clean_bank_name(user))
-
 
 class ChoiceBankForm(forms.Form):
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(),

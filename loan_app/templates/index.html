@@ -9,24 +9,24 @@
         <img src="{% static '/assets/smile_navi_tr.png' %}"  class="main-logo">
         <div class="subject-display">
             <div class="contents">
-            <h1 class="subject">計算</h1>
-                <a href="{% url 'loan_app:borrow_able' %}">借入可能額</a>
-                <a href="{% url 'loan_app:required_income' %}">借入に必要な年収</a>
-                <a href="{% url 'loan_app:repaid' %}">月々の支払い</a>
+                <h1 class="subject">計算</h1>
+                <a name="index_borrow_able" href="{% url 'loan_app:borrow_able' %}">借入可能額</a>
+                <a name="index_required_income" href="{% url 'loan_app:required_income' %}">借入に必要な年収</a>
+                <a name="index_repaid" href="{% url 'loan_app:repaid' %}">月々の支払い</a>
             </div>
             <div class="contents">
                 <h1 class="subject">住宅ローン情報</h1>
-                <a href="{% url 'loan_app:compare_interest' %}">金利の比較</a>
-                <a href="{% url 'loan_app:create_interest' %}">金利の追加</a>
-                <a href="{% url 'loan_app:choice_bank' %}">金利の編集</a>
-                <a href="{% url 'loan_app:create_option' %}">オプションの追加</a>
-                <a href="{% url 'loan_app:choice_option' %}">オプションの編集</a>
+                <a name="index_compare_interest" href="{% url 'loan_app:compare_interest' %}">金利の比較</a>
+                <a name="index_create_interest" href="{% url 'loan_app:create_interest' %}">金利の追加</a>
+                <a name="index_choice_bank" href="{% url 'loan_app:choice_bank' %}">金利の編集</a>
+                <a name="index_create_option" href="{% url 'loan_app:create_option' %}">オプションの追加</a>
+                <a name="index_choice_option" href="{% url 'loan_app:choice_option' %}">オプションの編集</a>
             </div>
             <div class="contents">
-                    <h1 class="subject">アカウント情報</h1>
-                    <a name="logout" class="logout" href="{% url 'account_signup' %}">アカウントの作成</a>
-                    <a name="logout" class="logout" href="{% url 'account_login' %}">ログイン</a>
-                    <a name="login" class="login" href="{% url 'account_logout' %}">ログアウト</a>
+                <h1 class="subject">アカウント情報</h1>
+                <a name="index_signup" class="logout" href="{% url 'account_signup' %}">アカウントの作成</a>
+                <a name="index_login"  class="logout" href="{% url 'account_login' %}">ログイン</a>
+                <a name="index_logout" class="login" href="{% url 'account_logout' %}">ログアウト</a>
             </div>
         </div>
 </section>

@@ -54,8 +54,8 @@ class UserMethods:
             option_rate = 0
             sum_rate = interest_rate
         else:
-            interest_rate = Decimal(self.request.POST['bank_rate'])
-            option_rate = Decimal(self.request.POST['bank_option'])
+            interest_rate = Decimal(data['bank_rate'])
+            option_rate = Decimal(data['bank_option'])
             sum_rate = float(interest_rate + option_rate)
         rates = [interest_rate, option_rate, sum_rate]
         return rates
@@ -108,9 +108,26 @@ class BorrowAbleView(generic.FormView, UserMethods):
         context['BankOption'] = bank_option
         return context
 
+    def form_invalid(self, form):
+        messages.error(self.request, '無効な数字が入力されています')
+        return super().form_invalid(form)
+
     # ログイン情報をform.pyに送る
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
+        returned = self.request.POST
+        if returned and returned['select'] == '1':
+            if 'bank_rate' in returned:
+                bank_rate = Decimal(returned['bank_rate'])
+                bank_option = Decimal(returned['bank_option'])
+            else:
+                bank_rate = None
+                bank_option = None
+            kwgs["bank_rate"] = bank_rate
+            kwgs["bank_option"] = bank_option
+        else:
+            kwgs["bank_rate"] = 0
+            kwgs["bank_option"] = 0
         user_name = self.get_userid(user='')
         kwgs["user"] = user_name
         return kwgs
@@ -136,6 +153,10 @@ class RequiredIncomeView(generic.FormView, UserMethods):
                                      required_income=required_income, form=form)
         return self.render_to_response(ctxt)
 
+    def form_invalid(self, form):
+        messages.error(self.request, '無効な数字が入力されています')
+        return super().form_invalid(form)
+
     # フォームにデータを送る
     def get_context_data(self, **kwargs,):
         context = super().get_context_data(**kwargs)
@@ -147,7 +168,20 @@ class RequiredIncomeView(generic.FormView, UserMethods):
 
     # ログイン情報をform.pyに送る
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
+        returned = self.request.POST
+        if returned and returned['select'] == '1':
+            if 'bank_rate' in returned:
+                bank_rate = Decimal(returned['bank_rate'])
+                bank_option = Decimal(returned['bank_option'])
+            else:
+                bank_rate = None
+                bank_option = None
+            kwgs["bank_rate"] = bank_rate
+            kwgs["bank_option"] = bank_option
+        else:
+            kwgs["bank_rate"] = 0
+            kwgs["bank_option"] = 0
         user_name = self.get_userid(user='')
         kwgs["user"] = user_name
         return kwgs
@@ -187,9 +221,13 @@ class RepaidView(generic.FormView, UserMethods):
             interest = total_repaid - borrow
         ctxt = self.get_context_data(interest_rate=interest_rate, borrow=module.com(borrow),
                                      amount_repaid=amount_repaid, total_repaid=module.com(total_repaid),
-                                     interest=module.com(interest),option_rate=option_rate, data=data,
+                                     interest=module.com(interest), option_rate=option_rate, data=data,
                                      form=form, js_data=js_data)
         return self.render_to_response(ctxt)
+
+    def form_invalid(self, form):
+        messages.error(self.request, '無効な数字が入力されています')
+        return super().form_invalid(form)
 
     # templatesにデータを送る
     def get_context_data(self, **kwargs,):
@@ -202,7 +240,20 @@ class RepaidView(generic.FormView, UserMethods):
 
     # ログイン情報をform.pyに送る
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
+        returned = self.request.POST
+        if returned and returned['select'] == '1':
+            if 'bank_rate' in returned:
+                bank_rate = Decimal(returned['bank_rate'])
+                bank_option = Decimal(returned['bank_option'])
+            else:
+                bank_rate = None
+                bank_option = None
+            kwgs["bank_rate"] = bank_rate
+            kwgs["bank_option"] = bank_option
+        else:
+            kwgs["bank_rate"] = 0
+            kwgs["bank_option"] = 0
         user_name = self.get_userid(user='')
         kwgs["user"] = user_name
         return kwgs
@@ -272,11 +323,6 @@ class OnlyYouMixin(UserPassesTestMixin):
             loan = get_object_or_404(Bank, pk=self.kwargs['pk'])
         return self.request.user == loan.user_id
 
-    # 1/19
-    # urlのユーザーごとのバリデーションは、reverse_lazyの引数で名前を指定してあげることで、
-    # 複数のPKを管理することができる
-    # また、次にクエリを送るためのpkは　int:pk
-
 
 class CreateInterestView(LoginRequiredMixin, generic.FormView, UserMethods):
 
@@ -296,11 +342,10 @@ class CreateInterestView(LoginRequiredMixin, generic.FormView, UserMethods):
         return super().form_invalid(form)
 
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
         user_name = self.get_userid(user='only_user')
         kwgs["user"] = user_name
         return kwgs
-
 
 
 class ChoiceBankView(LoginRequiredMixin, generic.FormView, UserMethods):
@@ -318,7 +363,7 @@ class ChoiceBankView(LoginRequiredMixin, generic.FormView, UserMethods):
                                 kwargs={'pk': self.request.POST['bank']})
 
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
         user_name = self.get_userid(user='only_user')
         kwgs["user"] = user_name
         return kwgs
@@ -378,7 +423,7 @@ class CreateOptionView(LoginRequiredMixin, generic.FormView, UserMethods):
         return super().form_invalid(form)
 
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
         user_name = self.get_userid(user='only_user')
         kwgs["user"] = user_name
         return kwgs
@@ -401,7 +446,7 @@ class ChoiceOptionView(LoginRequiredMixin, generic.FormView, UserMethods):
                                         'pk': self.request.POST.get('bank_option')})
 
     def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs(*args, **kwargs)
+        kwgs = super().get_form_kwargs()
         user_name = self.get_userid(user='only_user')
         kwgs["user"] = user_name
         return kwgs

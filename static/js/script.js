@@ -130,8 +130,8 @@ function select_option (page_type) {
     let bank_option = opt.filter( v => v.bank_id === name);
     let option;
     if (bank_option.length === 0) {
-        option += `<option value="0"> --------- </option>`;
-        option += `<option value="0"> オプション未登録 </option>`;
+        option += `<option value="0"> オプション無し </option>`;
+        option += `<option value="0"> オプションは未登録です。 </option>`;
     } else {
         if (page_type === 'change') {
             option += `<option value=""> --------- </option>`;
@@ -143,7 +143,7 @@ function select_option (page_type) {
             };
         } else {
             if (option_return == false || option_return === '0') {
-                option += `<option value="0"> --------- </option>`
+                option += `<option value="0"> オプション無し </option>`
             } else {
                 option += `<option value="${option_return}">${option_return}%</option>`
                 option += `<option value="0"> オプション無し </option>`
@@ -158,3 +158,12 @@ function select_option (page_type) {
     };
     document.getElementById('id_bank_option').insertAdjacentHTML('afterbegin', option);
 };
+
+//金利の0以下が入力されている場合削除する
+function errorCheck() {
+    console.log('start: error check')
+	var interest = document.getElementById('id_interest');
+  if ( interest.value <= 0  ) {
+  	interest.value = '';
+  }
+}

@@ -1,8 +1,9 @@
-
-from loan_app.models import Bank, InterestRate, Option
+from django.conf import settings
 
 from math import floor, ceil
 import pandas as pd
+import datetime
+import os
 
 
 # カンマで区切る
@@ -83,8 +84,34 @@ def PI_paid(borrow, interest_rate, year):
     return df
 
 
+def csv_pdata_path():
+    dt = str(datetime.datetime.now())
+    file_path = settings.PDATA_PATH + 'p_data_' + dt + '.csv'
+    os.makedirs(settings.PDATA_PATH, exist_ok=True)
+
+    files = os.listdir(settings.PDATA_PATH)
+    if len(files) >= settings.NUM_SAVED_PDATA:
+        files.sort()
+        os.remove(settings.PDATA_PATH + files[0])
+
+    return file_path
+
+
+def csv_pidata_path():
+    dt = str(datetime.datetime.now())
+    file_path = settings.PIDATA_PATH + 'pi_data_' + dt + '.csv'
+    os.makedirs(settings.PIDATA_PATH, exist_ok=True)
+
+    files = os.listdir(settings.PIDATA_PATH)
+    if len(files) >= settings.NUM_SAVED_PIDATA:
+        files.sort()
+        os.remove(settings.PIDATA_PATH + files[0])
+
+    return file_path
+
+
 # CSV作成(元利均等返済)
-def create_PIcsv(borrow, interest, year):
+def create_PIcsv(borrow, interest, year, csv_path):
     paid = PI_paid(borrow, interest, year)
     month = []
     interest_list = []
@@ -97,13 +124,12 @@ def create_PIcsv(borrow, interest, year):
         principal_list.append(value[2])
     js = [month, interest_list, principal_list, total_list]
     df = pd.DataFrame(paid)
-    df.to_csv('PIdata.csv')
-    # filename = self.create_graph('PIdata.csv', 'PIgraph')
+    df.to_csv(csv_path)
     return js
 
 
 # CSV作成(元金均等返済)
-def create_Pcsv(borrow, interest, year):
+def create_Pcsv(borrow, interest, year, csv_path):
     paid = P_paid(borrow, interest, year)
     month = []
     interest_list = []
@@ -114,11 +140,9 @@ def create_Pcsv(borrow, interest, year):
         total_list.append(value[0])
         interest_list.append(value[1])
         principal_list.append(value[2])
-
     js = [month, interest_list, principal_list, total_list]
     df = pd.DataFrame(paid)
-    df.to_csv('Pdata.csv')
-    # filename = self.create_graph('Pdata.csv', 'Pgraph')
+    df.to_csv(csv_path)
     return js
 
 

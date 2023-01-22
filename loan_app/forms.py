@@ -345,6 +345,7 @@ class CreateInterestForm(forms.Form):
                     '同じ銀行名は作成できません。'])
         return self.cleaned_data
 
+
 class ChoiceBankForm(forms.Form):
     bank = forms.ModelChoiceField(queryset=Bank.objects.none(),
                                   widget=forms.widgets.Select(), label='銀行名')

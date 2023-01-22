@@ -204,17 +204,19 @@ class RepaidView(generic.FormView, UserMethods):
         interest_rate, option_rate, sum_rate = self.select_interest(select, data)
         # 元金均等返済方
         if repaid_type == '0':
-            js_data = module.create_Pcsv(borrow, sum_rate, year)
+            csv_path = module.csv_pdata_path()
+            js_data = module.create_Pcsv(borrow, sum_rate, year, csv_path)
             amount_repaid = module.cal_paid(borrow, sum_rate, year)
             total_repaid = module.total_repaid(amount_repaid, year)
             interest = module.cal_interest(borrow, total_repaid)
-            data = self.read('Pdata.csv', year)
+            data = self.read(csv_path, year)
             # self.csv_to_excel('Pdata.csv')
             amount_repaid = module.com(amount_repaid)
         # 元利均等返済
         else:
-            js_data = module.create_PIcsv(borrow, sum_rate, year)
-            data = self.read('PIdata.csv', year)
+            csv_path = module.csv_pidata_path()
+            js_data = module.create_PIcsv(borrow, sum_rate, year, csv_path)
+            data = self.read(csv_path, year)
             # self.csv_to_excel('PIdata.csv')
             amount_repaid = data[0][1]
             total_repaid = module.total_PIrepaid(sum_rate, borrow, year)

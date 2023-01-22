@@ -62,7 +62,8 @@ class Command(BaseCommand):
             for i in di:
                 b_dict[i] = float(di[i])
             b_list = [b_dict[i] for i in b_dict]
-            interest = InterestRate(bank_id=bank_id, floating=b_dict['floating'],
+            interest = InterestRate(bank_id=bank_id,
+                                    floating=b_dict['floating'],
                                     fixed_1=b_dict['fixed_1'],
                                     fixed_2=b_dict['fixed_2'],
                                     fixed_3=b_dict['fixed_3'],

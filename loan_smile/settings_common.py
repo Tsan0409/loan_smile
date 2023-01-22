@@ -14,8 +14,6 @@ from pathlib import Path
 
 from django.contrib.messages import constants as messages
 
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -81,8 +79,6 @@ WSGI_APPLICATION = "loan_smile.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -93,9 +89,6 @@ DATABASES = {
         'PORT': '',
     }
 }
-
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -179,3 +172,15 @@ DEFAULT_FROM_EMAIL = os.environ.get('FROM_EMAIL')
 
 # メディアディレクトリの指定
 MEDIA_URL = '/media/'
+
+# バックアップバッジ用
+BACKUP_PATH = 'backup/'
+NUM_SAVED_BACKUP = 30
+
+# 元金均等用
+PDATA_PATH = STATIC_URL + 'p_data/'
+NUM_SAVED_PDATA = 50
+
+# 元利均等用
+PIDATA_PATH = STATIC_URL + 'pi_data/'
+NUM_SAVED_PIDATA = 50

@@ -50,6 +50,8 @@ class InterestRate(models.Model):
     fix_20to25 = models.FloatField(verbose_name='全期間固定金利型21〜25年')
     fix_25to30 = models.FloatField(verbose_name='全期間固定金利型26〜30年')
     fix_30to35 = models.FloatField(verbose_name='全期間固定金利型31〜35年')
+    created_at = models.DateField(verbose_name='作成日時', auto_now_add=True)
+    updated_at = models.DateField(verbose_name='更新日時', auto_now=True)
 
     def __str__(self):
         return str(self.bank_id)

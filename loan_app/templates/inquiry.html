@@ -11,13 +11,24 @@
 
         <h1 class="content-head">お問合せ</h1>
         <p class="contents-ex">必要事項を入力してください</p>
-        <form method="post">
+        <form method="post" id="form" class="form">
             {% csrf_token %}
 
             {{ form.non_field_errors }}
 
             <table>
                 {% for field in form %}
+                {% if field.label == "メッセージ" %}
+                <tr >
+                    <th>
+                        {{ field.label_tag }}
+                    </th>
+                    <td class="form-textarea">
+                        {{ field }}
+                    </td>
+                    {{ field.errors }}
+                </tr>
+                {% else %}
                 <tr>
                     <th>
                         {{ field.label_tag }}
@@ -27,8 +38,10 @@
                     </td>
                     {{ field.errors }}
                 </tr>
+                {% endif %}
                 {% endfor %}
             </table>
+
             <button class="btn btn-primary" type="submit">送信</button>
         </form>
 

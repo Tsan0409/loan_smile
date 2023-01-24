@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}サインアップ | Loan Smile{% endblock %}
-
 {% block active_signup %}active{% endblock %}
 
 {% block contents %}
 
-            <h1 class="content-head">サインアップ</h1>
-            <form action="{% url 'account_signup' %}" method="post">
+            <h1 class="content-head">アカウント登録</h1>
+            <form action="{% url 'account_signup' %}"id="form" class="form" method="post">
                 {% csrf_token %}
 
             {{ form.non_field_errors }}

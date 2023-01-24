@@ -12,6 +12,17 @@
             <table>
 
                 {% for field in form %}
+                {% if field.label == "返済タイプ" or field.label == "属性"%}
+                <tr>
+                    <th>
+                        {{ field.label }}
+                    </th>
+                    <td class="radio">
+                        {{ field }}
+                    </td>
+                </tr>
+
+                {% else %}
                 <tr>
                     <th>
                         {{ field.label }}
@@ -20,13 +31,14 @@
                         {{ field }}
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
                 <tr>
                     <th>
                         金利情報
                     </th>
                     <td class="form-text">
-                        <select name="bank_rate" class="select_radio" id="id_bank_rate" required>
+                        <select name="bank_rate" class="form-text" id="id_bank_rate" required>
                         </select>
                     </td>
                 </tr>
@@ -35,7 +47,7 @@
                         オプション
                     </th>
                     <td class="form-text">
-                        <select name="bank_option" class="select_radio" id="id_bank_option" required>
+                        <select name="bank_option" class="form-text" id="id_bank_option" required>
                             <option value="0"> --------- </option>
                         </select>
                     </td>
@@ -47,26 +59,27 @@
         {% if borrow is not None %}
 
         <div id="ans">
-            <table>
+            <table class="answer">
                 <tr>
                     <th>借入額</th>
-                    <td><span  class="answer">{{ borrow }}</span>円</td>
+                    <td><span  class="answer_main">{{ borrow }}</span>円</td>
                 </tr>
                 <tr>
                     <th>月々の支払い</th>
-                    <td><span  class="answer">{{ amount_repaid }}</span>円</td>
+                    <td><span  class="answer_main">{{ amount_repaid }}</span>円</td>
                 </tr>
                 <tr>
                     <th>総支払額</th>
-                    <td><span  class="answer">{{ total_repaid }}</span>円</td>
+                    <td><span  class="answer_main">{{ total_repaid }}</span>円</td>
                 </tr>
                 <tr>
                     <th>うち金利分</th>
-                    <td><span  class="answer">{{ interest }}</span>円</td>
+                    <td><span  class="answer_main">{{ interest }}</span>円</td>
                 </tr>
             </table>
-
-             <canvas id="myAreaChart"></canvas>
+            <div class="chart-container">
+                <canvas id="myAreaChart"></canvas>
+            </div>
 
             <table class="big-table">
                 <tr class="thead">
@@ -156,7 +169,18 @@ function create_graph() {
                 yAxes: [{
                     ticks: {
                         suggestedMin: 0,
-                        stepSize: 50000
+                        stepSize: 50000,
+                        callback: function(tick) {
+                            return tick.toString() + '円';
+                        }
+                    },
+                    stacked: true,
+                }],
+                xAxes: [{
+                    ticks: {
+                        callback: function(tick) {
+                            return tick.toString() + 'ヶ月';
+                        }
                     },
                     stacked: true,
                 }]
@@ -165,8 +189,8 @@ function create_graph() {
                 filler: {
                     propagate: true
                 }
-            }
-
+            },
+            maintainAspectRatio: false
         }
     });
 };

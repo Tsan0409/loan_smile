@@ -14,7 +14,6 @@
             {% csrf_token %}
 
             <table>
-
                 {% for field in form %}
                 <tr>
                     <th>
@@ -36,7 +35,7 @@
 
         <div id="ans">
 
-            <table class="big-table">
+            <table id="compare-interest" class="big-table">
                 <tr class="thead">
                     <th class="table-head">金融機関</th>
                     <th class="table-head">金利</th>
@@ -46,10 +45,9 @@
                 {% if i.interest == 0 %}
                 {% else %}
                 <tr>
-
-                    <td  class="table-data">{{ i.bank_id_id__bank_name  }}</td>
+                    <td class="table-data">{{ i.bank_id_id__bank_name }}</td>
                     <td data-label="金利" class="table-data">{{ i.interest }}％</td>
-                    <td data-label="100万円あたりの利息" class="table-data">{{ i.paid }}円</td>
+                    <td data-label="100万円当たり" class="table-data">{{ i.paid }}円の利息</td>
                 </tr>
                 {% endif %}
 

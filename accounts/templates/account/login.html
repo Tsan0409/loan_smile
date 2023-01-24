@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Log In | Private Diary{% endblock %}
-
 {% block active_login %}active{% endblock %}
 
 {% block contents %}
 
             <h1 class="content-head">ログイン</h1>
-            <form action="{% url 'account_login' %}" method="post">
+            <form action="{% url 'account_login' %}" id=form class="form" method="post">
                 {% csrf_token %}
 
             {{ form.non_field_errors }}

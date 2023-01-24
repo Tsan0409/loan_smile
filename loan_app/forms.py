@@ -78,8 +78,14 @@ class BorrowAbleForm(forms.Form):
         for field_name, field_value in self.fields.items():
             copy = str(field_value)
             if 'ChoiceField' in copy:
-                field_value.widget.attrs['class'] = 'select_radio'
+                if field_name == 'select':
+                    print('radio')
+                    field_value.widget.attrs['class'] = 'select_radio'
+                else:
+                    print('select)')
+                    field_value.widget.attrs['class'] = 'form-text'
             else:
+                print('text')
                 field_value.widget.attrs['class'] = 'form-text'
                 field_value.widget.attrs['placeholder'] = PH[f'{field_name}']
 
@@ -143,7 +149,10 @@ class RequiredIncomeForm(forms.Form):
         for field_name, field_value in self.fields.items():
             copy = str(field_value)
             if 'ChoiceField' in copy:
-                field_value.widget.attrs['class'] = 'select_radio'
+                if field_name == 'select':
+                    field_value.widget.attrs['class'] = 'select_radio'
+                else:
+                    field_value.widget.attrs['class'] = 'form-text'
             else:
                 field_value.widget.attrs['class'] = 'form-text'
                 field_value.widget.attrs['placeholder'] = PH[f'{field_name}']
@@ -212,7 +221,10 @@ class RepaidForm(forms.Form):
         for field_name, field_value in self.fields.items():
             copy = str(field_value)
             if 'ChoiceField' in copy:
-                field_value.widget.attrs['class'] = 'select_radio'
+                if field_name == 'select' or field_name == 'repaid_type':
+                    field_value.widget.attrs['class'] = 'select_radio'
+                else:
+                    field_value.widget.attrs['class'] = 'form-text'
             else:
                 field_value.widget.attrs['class'] = 'form-text'
                 field_value.widget.attrs['placeholder'] = PH[f'{field_name}']

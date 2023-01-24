@@ -1,3 +1,4 @@
+
 /* バランスの調整 */
 html {
     height: 100%;
@@ -17,7 +18,7 @@ body {
     flex-direction: column;
 }
 
-header {c
+header {
     width: 100%;
 }
 
@@ -28,11 +29,17 @@ footer {
     width: 100%;
 }
 
+
 .container {
     min-height: 100vh;
 }
 
 /* ハンバーガー */
+
+.hamburger img {
+    padding-top: 6px;
+
+}
 
 #nav {
     background-color: #053177;
@@ -104,8 +111,7 @@ footer {
 
 .menu-logo {
     width:120px;
-    margin-top: 14px;
-    padding-left: 14px;
+    padding: 10px 0px 0px 10px;
 }
 
 .header {
@@ -177,7 +183,7 @@ footer {
 .main-logo {
     width: 375px;
     display: flex;
-    margin:  140px auto 150px;
+    margin:  120px auto 50px;
 }
 
 .subject-display{
@@ -251,6 +257,8 @@ td {
     padding: 1rem 2rem;
     }
 
+
+
 .big-table {
     display: flex;
     justify-content: space-around;
@@ -258,7 +266,7 @@ td {
 }
 
 .table-head {
-    border-width: 2px;
+    border-width: 0.5px;
     border-style: solid;
     color: #E0D5CA;
     border-color: #96a8c6;
@@ -271,16 +279,12 @@ td {
 }
 
 .table-data {
-    border-width: 2px;
+    border-width: 0.5px;
     border-style: solid;
     border-color: #96a8c6;
     text-align: left;
     padding: auto;
 }
-
-
-
-
 
 .message {
     text-align: center;
@@ -299,19 +303,39 @@ td {
 .form-text input {
     width: 60%;
     background-color: white;
-
 }
 
 .form-text select {
     width: 60%;
     padding: 0.185rem;
     background-color: white;
+}
 
 
+/* テキストエリア */
+.form-textarea {
+    width: 60%;
+    height: auto;
+    padding: 0rem;
+    margin-right:0.25rem;
+}
+
+.form-textarea textarea {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    height: 7rem;
+    padding-bottom: 7rem;
+    background-color: white;
+}
+
+.form-textarea:focus {
+    outline: 0;
+    box-shadow: 0 0 0 2px rgb(33, 150, 243) inset;
 }
 
 .form-text textarea {
     margin-top: 1rem;
+    height: 7rem;
     padding-bottom: 7rem;
     background-color: white;
 }
@@ -320,6 +344,8 @@ td {
     outline: 0;
     box-shadow: 0 0 0 2px rgb(33, 150, 243) inset;
 }
+
+/* ラジオボタン */
 
 .select_radio {
     padding: 0rem;
@@ -332,19 +358,22 @@ td {
 }
 
 .select_radio label {
-    padding: 1rem;
     width: 12rem;
     display:flex;
 }
 
 .select_radio input {
-    position: relative;
-    top: 0.3rem;
+    margin-right: 0.3rem;
     width: 1rem;
 }
 
+td.radio {
+    padding-left: 0rem;
+}
 
-.answer {
+/* 回答 */
+
+.answer_main {
     font-size: 2.5rem;
     color:#E39210;
 }
@@ -423,8 +452,25 @@ footer a:hover {
 
 /* Chart.js */
 #myAreaChart {
-    width: 80%;
+    height: 40rem;
+    max-width: 85%;
+    align-content: center;
+    margin: 3rem auto;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @media (max-width: 600px) {
@@ -476,10 +522,6 @@ footer a:hover {
 }
 
 
-.contents a {
-    /* display: none; */
-}
-
 
 /* テーブル縦並び */
 .form table {
@@ -494,22 +536,27 @@ footer a:hover {
 
 .form th {
     text-align: left;
-    width:80%;
+    width:90%;
     padding: 0.5rem 0rem 0.5rem 10%;
-    margin: 0.5rem auto ;
+    margin: 0rem auto ;
 
 }
 
 .form td {
-    width: 80%;
+    width: 90%;
     vertical-align: middle;
     text-align: left;
-    padding: 0.5rem 0.5rem 0.5rem 10%;
+    padding: 0rem 0.5rem 0.5rem 10%;
     margin: 0.5rem auto;
     }
 
 .form-text {
-    min-width: 200px;
+    min-width: 250px;
+    padding-left: 0rem;
+}
+
+.form-textarea {
+    min-width: 250px;
     padding-left: 0rem;
 }
 
@@ -532,48 +579,81 @@ footer a:hover {
 
 /* ラジオボタン */
 
-.select_radio {
-    width:80%;
-    justify-content:space-between;
-    display: flex;
-    flex-direction: column;
+td .select_radio {
+    padding-bottom: 4rem;
+
 }
 
-
-.select_radio div {
-    display: flex;
+.select_radio {
     flex-direction: column;
+    padding: 0rem;
+}
+
+.select_radio div { 
+    padding: 0rem;
+}
+
+#id_repaid_type {
+    padding: 0rem;
+}
+
+#id_select {
+    padding: 0rem;
 }
 
 .select_radio label {
-    vertical-align: middle;
-    width: 15rem;
-    padding: 0.25rem;
-    display:flex;
+    padding: 0rem 0rem 0.25rem ;
+    width: 17rem;
+
 }
 
 .select_radio input {
-    vertical-align: middle;
-    padding: 1rem;
-    width: 1rem;
+    margin-right: 1rem;
+    width: 1.2rem;
 }
+
+/* 回答のテーブル */
+
+.answer table {
+    width: 100%;
+}
+
+.answer th, #ans td {
+    display: block;
+    width: 100%;
+}
+
+
+.answer th {
+    text-align: center;
+    width: 90%;
+    padding: 0.2 rem auto;
+    margin: 0.5rem auto ;
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.answer td {
+    text-align: center;
+    width: 90%;
+    vertical-align: middle;
+    padding: 0.5rem auto 0.5rem;
+    margin: 0.5rem auto;
+    }
 
 /* テーブル操作 */
 
   .big-table {
-    width: 80%;
+    width: 95%;
   }
 
   .table-head {
     display:none;
   }
 
-
   .big-table tr {
     width: 100%;
   }
-
-
 
   .big-table td {
     display: block;
@@ -593,14 +673,40 @@ footer a:hover {
     margin-right: 10px;
   }
 
+  /* 金利比較の時の文字サイズ調整 */
 
-/* グラフ画像 */
-.graph img {
-    width: 375px;
-    margin: 1rem auto;
+#compare-interest td::before {
+    text-align: left;
+    margin-top: 0.125rem;
+    font-size: 0.9rem;
+    max-width: 45%;
+}
 
+/* 注意書き系の整頓 */
+
+.confirm {
+    max-width: 80%;
+    margin: auto;
+}
+
+.confirm .contents-ex {
+    text-align: left;
+}
+
+.chart-container {
+    position: relative;
+    height: 25rem;
+    margin: 0rem auto;
 }
 
 
+}
+
+@media (max-width: 450px) {
+    .main-logo {
+        width: 300px;
+        display: flex;
+        margin:  140px auto 150px;
+    }
 
 }

@@ -16,6 +16,17 @@
             <table>
 
                 {% for field in form %}
+                {% if field.label == "返済タイプ" or field.label == "属性"%}
+                <tr>
+                    <th>
+                        {{ field.label }}
+                    </th>
+                    <td class="radio">
+                        {{ field }}
+                    </td>
+                </tr>
+
+                {% else %}
                 <tr>
                     <th>
                         {{ field.label }}
@@ -24,13 +35,14 @@
                         {{ field }}
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
                 <tr>
                     <th>
                         金利情報
                     </th>
                     <td class="form-text">
-                        <select name="bank_rate" class="select_radio" id="id_bank_rate" required>
+                        <select name="bank_rate" class="form-text" id="id_bank_rate" required>
                         </select>
                     </td>
                 </tr>
@@ -39,7 +51,7 @@
                         オプション
                     </th>
                     <td class="form-text">
-                        <select name="bank_option" class="select_radio" id="id_bank_option" required>
+                        <select name="bank_option" class="form-text" id="id_bank_option" required>
                             <option value="0"> --------- </option>
                         </select>
                     </td>
@@ -50,11 +62,11 @@
 
 
         {% if borrowable is not None %}
-        <table id="ans" >
+        <table id="ans" class="answer">
             <tr>
                 <th>借入可能額</th>
                 <td id="borrowable">
-                    <span  class="answer">
+                    <span  class="answer_main">
                         {{ borrowable }}
                     </span> 円
                 </td>

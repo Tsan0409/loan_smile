@@ -1,2 +1,4 @@
 .idea
 *.pyc
+static/p_data
+static/pi_data

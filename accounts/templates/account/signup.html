@@ -5,7 +5,7 @@
 {% block contents %}
 
             <h1 class="content-head">アカウント登録</h1>
-            <form action="{% url 'account_signup' %}"id="form" class="form" method="post">
+            <form action="{% url 'account_signup' %}" id="form" class="form" method="post">
                 {% csrf_token %}
 
             {{ form.non_field_errors }}

@@ -2,12 +2,25 @@ from .settings_common import *
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-xdacf%rs+!i$=j3g*cnzf+@+691m7t^82a$lm=wd7^(%$1icv_"
+# セキュリティキー
+SECRET_KEY = os.environ.get('DJANGO_SECURITY_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# 許可するホスト
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
+
+# 静的ファイル
+STATIC_ROOT = '/usr/share/nginx/html/static'
+MEDIA_ROOT = '/usr/share/nginx/html/media'
+
+# Amazon SES 関連
+
+AWS_SES_ACCESS_KEY_ID = os.environ.get('AWS_SES_ACCESS_KEY_ID')
+AWS_SES_SECRET_ACCESS_KEY = os.environ.get('AWS_SES_SECRET_ACCESS_KEY')
+EMAIL_BACKEND = 'django_ses.SESBackend'
+
 
 # ロギング
 LOGGING = {
@@ -18,28 +31,32 @@ LOGGING = {
     'loggers': {
         # Djangoが利用するロガー
         'django': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'level': 'INFO',
         },
         # アプリケーションが利用するロガー
         'loan_app': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
+            'handlers': ['file'],
+            'level': 'INFO',
         },
     },
 
     # ハンドラの設定
     'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'dev'
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'formatter': 'prod',
+            'when': 'D',
+            'interval': 1,
+            'backupCount': 7,
         },
     },
 
     # フォーマッタの設定
     'formatters': {
-        'dev': {
+        'prod': {
             'format': '\t'.join([
                 '%(asctime)s',
                 '[%(levelname)s]',
@@ -49,13 +66,3 @@ LOGGING = {
         },
     }
 }
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# 定期更新
-CRONJOBS = [
-    ('5 * * * *', 'loan_app.sample_job'),
-    ('1 * * * *', 'django.core.management.sample'),
-]

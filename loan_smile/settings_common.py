@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'django_crontab',
+
+    'django_ses',
 ]
 
 MIDDLEWARE = [

@@ -302,6 +302,7 @@ td {
 
 .form-text input {
     width: 60%;
+    height:1.55rem;
     background-color: white;
 }
 
@@ -370,6 +371,7 @@ td {
 td.radio {
     padding-left: 0rem;
 }
+
 
 /* 回答 */
 

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from loan_app.models import Bank, InterestRate
+from loan_smile.settings import DRIVER
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -87,7 +88,7 @@ class Command(BaseCommand):
         def sumitomo_scraping():
             opt = webdriver.ChromeOptions()
             opt.add_argument('--headless')
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=opt)
+            driver = webdriver.Chrome(executable_path=DRIVER, options=opt)
             driver.implicitly_wait(10)
             driver.get('https://www.smbc.co.jp/kojin/jutaku_loan/kinri/')
             time.sleep(3)
@@ -115,7 +116,7 @@ class Command(BaseCommand):
         def ufj_scraping():
             opt = webdriver.ChromeOptions()
             opt.add_argument('--headless')
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=opt)
+            driver = webdriver.Chrome(executable_path=DRIVER, options=opt)
             driver.implicitly_wait(10)
             driver.get(
                 'https://www.bk.mufg.jp/kariru/jutaku/yuuguu/index.html')
@@ -169,7 +170,7 @@ class Command(BaseCommand):
         def mizuho_scraping():
             opt = webdriver.ChromeOptions()
             opt.add_argument('--headless')
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=opt)
+            driver = webdriver.Chrome(executable_path=DRIVER, options=opt)
             driver.implicitly_wait(10)
             driver.get(
                 'https://www.mizuhobank.co.jp/retail/products/loan/housing/housingloancost/index.html')

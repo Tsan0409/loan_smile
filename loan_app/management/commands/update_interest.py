@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-# ↑　pip install
+import time
 
 
 class Command(BaseCommand):
@@ -16,6 +16,7 @@ class Command(BaseCommand):
         def source(url):
             load_url = url
             html = requests.get(load_url)
+            time.sleep(3)
             soup = BeautifulSoup(html.content, "html.parser",
                                  from_encoding='utf-8')
             return soup
@@ -89,7 +90,9 @@ class Command(BaseCommand):
             driver = webdriver.Chrome(ChromeDriverManager().install(), options=opt)
             driver.implicitly_wait(10)
             driver.get('https://www.smbc.co.jp/kojin/jutaku_loan/kinri/')
+            time.sleep(3)
             html = driver.page_source.encode('utf_8')
+            time.sleep(3)
             soup = BeautifulSoup(html, 'html.parser')
             s = []
             arrange(soup, 'td', s)
@@ -116,7 +119,9 @@ class Command(BaseCommand):
             driver.implicitly_wait(10)
             driver.get(
                 'https://www.bk.mufg.jp/kariru/jutaku/yuuguu/index.html')
+            time.sleep(3)
             html = driver.page_source.encode('utf_8')
+            time.sleep(3)
             soup = BeautifulSoup(html, 'html.parser')
             s = []
             arrange(soup, 'strong', s)
@@ -138,6 +143,7 @@ class Command(BaseCommand):
         def risona_interest():
             i = []
             soup = source('https://www.resonabank.co.jp/kojin/loan_viewer.html')
+            time.sleep(3)
             arrange(soup, 'td', i)
             fix = i[225:229]
             i = i[1:40]
@@ -167,7 +173,9 @@ class Command(BaseCommand):
             driver.implicitly_wait(10)
             driver.get(
                 'https://www.mizuhobank.co.jp/retail/products/loan/housing/housingloancost/index.html')
+            time.sleep(3)
             html = driver.page_source.encode('utf_8')
+            time.sleep(3)
             soup = BeautifulSoup(html, 'html.parser')
             s = []
             arrange(soup, 'td', s)

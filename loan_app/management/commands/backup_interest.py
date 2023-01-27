@@ -61,7 +61,6 @@ class Command(BaseCommand):
                                 str(interest.fix_20to25),
                                 str(interest.fix_25to30),
                                 str(interest.fix_30to35),
-                                str(interest.created_at),
                                 str(interest.updated_at)])
 
             option_header = [field.name for field in Option._meta.fields]

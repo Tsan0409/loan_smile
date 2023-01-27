@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from .models import Bank, InterestRate, Option
 
 import os
@@ -79,13 +78,10 @@ class BorrowAbleForm(forms.Form):
             copy = str(field_value)
             if 'ChoiceField' in copy:
                 if field_name == 'select':
-                    print('radio')
                     field_value.widget.attrs['class'] = 'select_radio'
                 else:
-                    print('select)')
                     field_value.widget.attrs['class'] = 'form-text'
             else:
-                print('text')
                 field_value.widget.attrs['class'] = 'form-text'
                 field_value.widget.attrs['placeholder'] = PH[f'{field_name}']
 

@@ -186,3 +186,6 @@ NUM_SAVED_PDATA = 50
 # 元利均等用
 PIDATA_PATH = STATIC_URL + 'pi_data/'
 NUM_SAVED_PIDATA = 50
+
+# selenium driver
+DRIVER = os.environ.get('DRIVER')

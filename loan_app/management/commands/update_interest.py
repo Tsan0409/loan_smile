@@ -1,15 +1,15 @@
 from django.core.management.base import BaseCommand
 from loan_app.models import Bank, InterestRate
-from loan_smile.settings import DRIVER
+from loan_smile.settings_common import DRIVER
+
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 
 class Command(BaseCommand):
-    help = "金利のアップデート"
+    help = "Update Interest Rate"
 
     def handle(self, *args, **options):
 
@@ -110,7 +110,7 @@ class Command(BaseCommand):
             bank_id = Bank.objects.get(bank_id=1)
             save_interest(data_dict, bank_id)
             print('保存完了', data_dict)
-            return
+            return data_dict
 
         # 三菱UFJ11/2(selenium)
         def ufj_scraping():
@@ -138,7 +138,7 @@ class Command(BaseCommand):
             bank_id = Bank.objects.get(bank_id=2)
             save_interest(data_dict, bank_id)
             print('保存完了', data_dict)
-            return new_data
+            return data_dict
 
         # りそな銀行
         def risona_interest():
@@ -164,7 +164,7 @@ class Command(BaseCommand):
             bank_id = Bank.objects.get(bank_id=3)
             save_interest(data_dict, bank_id)
             print('保存完了', data_dict)
-            return
+            return data_dict
 
         # みずほ
         def mizuho_scraping():
@@ -191,7 +191,7 @@ class Command(BaseCommand):
             bank_id = Bank.objects.get(bank_id=4)
             save_interest(data_dict, bank_id)
             print('保存完了', data_dict)
-            return
+            return data_dict
 
         sumitomo_scraping()
         risona_interest()

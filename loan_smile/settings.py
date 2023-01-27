@@ -67,4 +67,4 @@ LOGGING = {
     }
 }
 
-DRIVER = '/usr/bin/chromedriver'
+# DRIVER = '/usr/bin/chromedriver'

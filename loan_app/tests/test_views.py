@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse_lazy
+from django.test import LiveServerTestCase
 
 from ..models import Bank, InterestRate, Option
+from loan_smile.settings_common import DRIVER
 
-from django.test import LiveServerTestCase
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -462,7 +464,7 @@ class TestBorrowableView(LiveServerTestCase, LoggedInTestCase):
         test_bank = Bank.objects.create(user_id=self.test_user,
                                         bank_name='テスト銀行')
 
-        interest_rate = InterestRate.objects.create(
+        InterestRate.objects.create(
             bank_id=test_bank, floating='1', fixed_1='1',
             fixed_2='1', fixed_3='1', fixed_5='1', fixed_7='1',
             fixed_10='1', fixed_15='1', fixed_20='1', fixed_30='1',
@@ -867,7 +869,9 @@ class TestRedirectLogin(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver(executable_path='/Users/tsukakosuke/Desktop/chromedriver_mac64 /chromedriver')
+        opt = ChromeOptions()
+        opt.add_argument('--headless')
+        cls.selenium = WebDriver(executable_path=DRIVER, options=opt)
 
     @classmethod
     def tearDownClass(cls):
@@ -1079,7 +1083,9 @@ class TestRedirectLogout(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver(executable_path='/Users/tsukakosuke/Desktop/chromedriver_mac64 /chromedriver')
+        opt = ChromeOptions()
+        opt.add_argument('--headless')
+        cls.selenium = WebDriver(executable_path=DRIVER, options=opt)
 
     @classmethod
     def tearDownClass(cls):

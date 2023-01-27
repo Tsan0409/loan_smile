@@ -179,6 +179,10 @@ MEDIA_URL = '/media/'
 BACKUP_PATH = 'backup/'
 NUM_SAVED_BACKUP = 30
 
+# アップデートバッジ用
+UPDATE_PATH = 'update/'
+NUM_UPDATE_INTEREST = 24
+
 # 元金均等用
 PDATA_PATH = STATIC_URL + 'p_data/'
 NUM_SAVED_PDATA = 50

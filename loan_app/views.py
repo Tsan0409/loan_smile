@@ -6,38 +6,34 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 
-
-from .forms import InquiryForm, BorrowAbleForm,\
-    RequiredIncomeForm, RepaidForm, CreateInterestForm,\
-    UpdateInterestForm, ChoiceBankForm, CompareInterestForm, \
+from .forms import InquiryForm, BorrowAbleForm, RequiredIncomeForm, RepaidForm,\
+    CreateInterestForm, UpdateInterestForm, ChoiceBankForm, CompareInterestForm,\
     CreateOptionForm, ChoiceOptionForm, UpdateOptionForm
 from .models import Bank, InterestRate, Option
 from .modules import module
 
-import pandas as pd
 from decimal import Decimal
-
 
 logger = logging.getLogger(__name__)
 
 
 class UserMethods:
 
-    # 金利作成
+    # 金利を取得
     def get_bank_info(self, user):
         user_name = self.get_userid(user)
         json_encode = InterestRate.objects.all().select_related('bank_id').filter(bank_id__user_id__in=user_name)
         bank_info = module.create_bank_dict(json_encode)
         return bank_info
 
-    # option_data
+    # オプションを取得
     def get_bank_option(self, user):
         user_name = self.get_userid(user)
         json_encode = Option.objects.all().select_related('bank_id').filter(bank_id__user_id__in=user_name)
         bank_option = module.create_option_dict(json_encode)
         return bank_option
 
-    # ユーザー分
+    # 初期userと独自userをリストで取得する
     def get_userid(self, user):
         if not self.request.user.is_authenticated:
             user_name = ['1']
@@ -47,75 +43,22 @@ class UserMethods:
             user_name = [self.request.user, '1']
         return user_name
 
-    # 金利のタイプで返す値を変える
-    def select_interest(self, select, data):
-        if select == '0':
-            interest_rate = float(Decimal(data['interest']))
-            option_rate = 0
-            sum_rate = interest_rate
-        else:
-            interest_rate = Decimal(data['bank_rate'])
-            option_rate = Decimal(data['bank_option'])
-            sum_rate = float(interest_rate + option_rate)
-        rates = [interest_rate, option_rate, sum_rate]
-        return rates
+    # userを取得する
+    def judge_user_for_model(self, kwgs):
+        user_name = self.get_userid(user='only_user')
+        kwgs["user"] = user_name
+        return
 
-
-class IndexView(generic.TemplateView):
-    template_name = 'index.html'
-
-
-class InquiryView(generic.FormView):
-    template_name = 'inquiry.html'
-    form_class = InquiryForm
-    success_url = reverse_lazy('loan_app:inquiry')
-
-    # フォームのバリデーションが問題なければ動くメソッド
-    def form_valid(self, form):
-        form.send_email()
-        messages.success(self.request, 'メッセージを送信しました')
-        logger.info(f'Inquiry sent by {form.cleaned_data["name"]}')
-        return super().form_valid(form)
-
-
-class BorrowAbleView(generic.FormView, UserMethods):
-
-    form_class = BorrowAbleForm
-    model = InterestRate
-    template_name = 'borrow_able.html'
-
-    # 計算処理
-    def form_valid(self, form):
-        data = form.cleaned_data
-        income = data['income']
-        repayment_ratio = data['repayment_ratio']
-        debt = data['debt']
-        year = data['year']
-        select = data['select']
-        interest_rate, option_rate, sum_rate = self.select_interest(select, data)
-        million_per = module.per_million(sum_rate, year)
-        borrowable = module.com(module.borrowable(income, repayment_ratio, debt, million_per))
-        ctxt = self.get_context_data(interest_rate=interest_rate, borrowable=borrowable,
-                                     option_rate=option_rate,  form=form)
-        return self.render_to_response(ctxt)
-
-    # フォームにデータを送る
-    def get_context_data(self, **kwargs,):
-        context = super().get_context_data(**kwargs)
+    # 金利とオプションデータを入れる
+    def send_user_data(self, context):
         bank_info = self.get_bank_info(user='')
         context['BankInfo'] = bank_info
         bank_option = self.get_bank_option(user='')
         context['BankOption'] = bank_option
-        return context
+        return
 
-    def form_invalid(self, form):
-        messages.error(self.request, '無効な数字が入力されています')
-        return super().form_invalid(form)
-
-    # ログイン情報をform.pyに送る
-    def get_form_kwargs(self, *args, **kwargs):
-        kwgs = super().get_form_kwargs()
-        returned = self.request.POST
+    # ラジオボタンと入力されたデータの処理
+    def judge_radio_and_returned(self, kwgs, returned):
         if returned and returned['select'] == '1':
             if 'bank_rate' in returned:
                 bank_rate = Decimal(returned['bank_rate'])
@@ -130,6 +73,62 @@ class BorrowAbleView(generic.FormView, UserMethods):
             kwgs["bank_option"] = 0
         user_name = self.get_userid(user='')
         kwgs["user"] = user_name
+        return
+
+
+class IndexView(generic.TemplateView):
+
+    template_name = 'index.html'
+
+
+class InquiryView(generic.FormView):
+
+    template_name = 'inquiry.html'
+    form_class = InquiryForm
+    success_url = reverse_lazy('loan_app:inquiry')
+
+    def form_valid(self, form):
+        form.send_email()
+        messages.success(self.request, 'メッセージを送信しました')
+        logger.info(f'Inquiry sent by {form.cleaned_data["name"]}')
+        return super().form_valid(form)
+
+
+class BorrowAbleView(generic.FormView, UserMethods):
+
+    form_class = BorrowAbleForm
+    model = InterestRate
+    template_name = 'borrow_able.html'
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        income = data['income']
+        repayment_ratio = data['repayment_ratio']
+        debt = data['debt']
+        year = data['year']
+        select = data['select']
+        interest_rate, option_rate, sum_rate = module.select_interest(select, data)
+        million_per = module.per_million(sum_rate, year)
+        borrowable = module.com(module.borrowable(income, repayment_ratio, debt, million_per))
+        ctxt = self.get_context_data(interest_rate=interest_rate, borrowable=borrowable,
+                                     option_rate=option_rate,  form=form)
+        return self.render_to_response(ctxt)
+
+    def form_invalid(self, form):
+        messages.error(self.request, '無効な数字が入力されています')
+        return super().form_invalid(form)
+
+    # HTMLにデータを送る
+    def get_context_data(self, **kwargs,):
+        context = super().get_context_data(**kwargs)
+        self.send_user_data(context)
+        return context
+
+    # ログイン情報をform.pyに送る
+    def get_form_kwargs(self, *args, **kwargs):
+        kwgs = super().get_form_kwargs()
+        returned = self.request.POST
+        self.judge_radio_and_returned(kwgs, returned)
         return kwgs
 
 
@@ -146,7 +145,7 @@ class RequiredIncomeView(generic.FormView, UserMethods):
         repayment_ratio = data['repayment_ratio']
         year = data['year']
         select = data['select']
-        interest_rate, option_rate, sum_rate = self.select_interest(select, data)
+        interest_rate, option_rate, sum_rate = module.select_interest(select, data)
         per_million = module.per_million(sum_rate, year)
         required_income = module.com(module.required_income(repayment_ratio, per_million, borrow))
         ctxt = self.get_context_data(interest_rate=interest_rate, option_rate=option_rate,
@@ -157,33 +156,17 @@ class RequiredIncomeView(generic.FormView, UserMethods):
         messages.error(self.request, '無効な数字が入力されています')
         return super().form_invalid(form)
 
-    # フォームにデータを送る
+    # HTMLに金利とオプションデータを送る
     def get_context_data(self, **kwargs,):
         context = super().get_context_data(**kwargs)
-        bank_info = self.get_bank_info(user='')
-        context['BankInfo'] = bank_info
-        bank_option = self.get_bank_option(user='')
-        context['BankOption'] = bank_option
+        self.send_user_data(context)
         return context
 
     # ログイン情報をform.pyに送る
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs()
         returned = self.request.POST
-        if returned and returned['select'] == '1':
-            if 'bank_rate' in returned:
-                bank_rate = Decimal(returned['bank_rate'])
-                bank_option = Decimal(returned['bank_option'])
-            else:
-                bank_rate = None
-                bank_option = None
-            kwgs["bank_rate"] = bank_rate
-            kwgs["bank_option"] = bank_option
-        else:
-            kwgs["bank_rate"] = 0
-            kwgs["bank_option"] = 0
-        user_name = self.get_userid(user='')
-        kwgs["user"] = user_name
+        self.judge_radio_and_returned(kwgs, returned)
         return kwgs
 
 
@@ -193,7 +176,6 @@ class RepaidView(generic.FormView, UserMethods):
     model = InterestRate
     template_name = 'repaid.html'
 
-    # 計算処理
     def form_valid(self, form):
         data = form.cleaned_data
         borrow = data['borrow']
@@ -201,25 +183,23 @@ class RepaidView(generic.FormView, UserMethods):
         year = data['year']
         select = data['select']
         repaid_type = data['repaid_type']
-        interest_rate, option_rate, sum_rate = self.select_interest(select, data)
+        interest_rate, option_rate, sum_rate = module.select_interest(select, data)
         # 元金均等返済方
         if repaid_type == '0':
             csv_path = module.csv_pdata_path()
-            js_data = module.create_Pcsv(borrow, sum_rate, year, csv_path)
+            js_data = module.create_p_csv(borrow, sum_rate, year, csv_path)
             amount_repaid = module.cal_paid(borrow, sum_rate, year)
             total_repaid = module.total_repaid(amount_repaid, year)
             interest = module.cal_interest(borrow, total_repaid)
-            data = self.read(csv_path, year)
-            # self.csv_to_excel('Pdata.csv')
+            data = module.read(csv_path, year)
             amount_repaid = module.com(amount_repaid)
         # 元利均等返済
         else:
             csv_path = module.csv_pidata_path()
-            js_data = module.create_PIcsv(borrow, sum_rate, year, csv_path)
-            data = self.read(csv_path, year)
-            # self.csv_to_excel('PIdata.csv')
+            js_data = module.create_pi_csv(borrow, sum_rate, year, csv_path)
+            data = module.read(csv_path, year)
             amount_repaid = data[0][1]
-            total_repaid = module.total_PIrepaid(sum_rate, borrow, year)
+            total_repaid = module.total_pi_repaid(sum_rate, borrow, year)
             interest = total_repaid - borrow
         ctxt = self.get_context_data(interest_rate=interest_rate, borrow=module.com(borrow),
                                      amount_repaid=amount_repaid, total_repaid=module.com(total_repaid),
@@ -231,64 +211,18 @@ class RepaidView(generic.FormView, UserMethods):
         messages.error(self.request, '無効な数字が入力されています')
         return super().form_invalid(form)
 
-    # templatesにデータを送る
+    # HTMLにデータを送る
     def get_context_data(self, **kwargs,):
         context = super().get_context_data(**kwargs)
-        bank_info = self.get_bank_info(user='')
-        context['BankInfo'] = bank_info
-        bank_option = self.get_bank_option(user='')
-        context['BankOption'] = bank_option
+        self.send_user_data(context)
         return context
 
     # ログイン情報をform.pyに送る
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs()
         returned = self.request.POST
-        if returned and returned['select'] == '1':
-            if 'bank_rate' in returned:
-                bank_rate = Decimal(returned['bank_rate'])
-                bank_option = Decimal(returned['bank_option'])
-            else:
-                bank_rate = None
-                bank_option = None
-            kwgs["bank_rate"] = bank_rate
-            kwgs["bank_option"] = bank_option
-        else:
-            kwgs["bank_rate"] = 0
-            kwgs["bank_option"] = 0
-        user_name = self.get_userid(user='')
-        kwgs["user"] = user_name
+        self.judge_radio_and_returned(kwgs, returned)
         return kwgs
-
-    # csvの読み込み
-    def read(self, csv, year):
-        df = pd.read_csv(csv)
-        li = ["1", '13', '25', '49', '109', '228', '349', '409']
-        years = [' 1年目', '  2年目', ' 3年目', ' 5年目', '10年目', '20年目', '30年目',
-                 '35年目']
-        contents = {}
-        if year == 35:
-            count = 7
-        elif year >= 30:
-            count = 6
-        elif year >= 20:
-            count = 5
-        elif year >= 10:
-            count = 4
-        elif year >= 5:
-            count = 3
-        elif year >= 2:
-            count = 2
-        elif year >= 1:
-            count = 1
-        else:
-            count = 0
-        for n in range(count + 1):
-            ind = [years[n]]
-            for i in range(4):
-                ind.append(str(module.com(df.iloc[i][li[n]])))
-            contents[n] = ind
-        return contents
 
 
 class CompareInterestView(generic.FormView, LoginRequiredMixin, UserMethods):
@@ -314,6 +248,7 @@ class CompareInterestView(generic.FormView, LoginRequiredMixin, UserMethods):
         return self.render_to_response(ctxt)
 
 
+# ユーザ以外のアクセスを制限
 class OnlyYouMixin(UserPassesTestMixin):
 
     raise_exception = True
@@ -345,8 +280,7 @@ class CreateInterestView(LoginRequiredMixin, generic.FormView, UserMethods):
 
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs()
-        user_name = self.get_userid(user='only_user')
-        kwgs["user"] = user_name
+        self.judge_user_for_model(kwgs)
         return kwgs
 
 
@@ -366,8 +300,7 @@ class ChoiceBankView(LoginRequiredMixin, generic.FormView, UserMethods):
 
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs()
-        user_name = self.get_userid(user='only_user')
-        kwgs["user"] = user_name
+        self.judge_user_for_model(kwgs)
         return kwgs
 
 
@@ -426,8 +359,7 @@ class CreateOptionView(LoginRequiredMixin, generic.FormView, UserMethods):
 
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs()
-        user_name = self.get_userid(user='only_user')
-        kwgs["user"] = user_name
+        self.judge_user_for_model(kwgs)
         return kwgs
 
 
@@ -449,11 +381,9 @@ class ChoiceOptionView(LoginRequiredMixin, generic.FormView, UserMethods):
 
     def get_form_kwargs(self, *args, **kwargs):
         kwgs = super().get_form_kwargs()
-        user_name = self.get_userid(user='only_user')
-        kwgs["user"] = user_name
+        self.judge_user_for_model(kwgs)
         return kwgs
 
-    # フォームにデータを送る
     def get_context_data(self, **kwargs,):
         context = super().get_context_data(**kwargs)
         bank_option = self.get_bank_option(user='only_user')

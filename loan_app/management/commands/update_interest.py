@@ -36,7 +36,7 @@ def arrange(soup, tag, lst):
     return lst
 
 
-# 銀行データの穴埋め
+# 銀行データの型枠
 def bank_dict(di, bank_name):
     b_dict = {'bank_name': f'{bank_name}', 'floating': 0, 'fixed_1': 0,
               'fixed_2': 0,
@@ -52,7 +52,7 @@ def bank_dict(di, bank_name):
     return b_list
 
 
-# 銀行データの穴埋め
+# 銀行データの保存
 def save_interest(di, bank_id):
     b_dict = {'bank_id': bank_id, 'floating': 0, 'fixed_1': 0,
               'fixed_2': 0,
@@ -115,7 +115,7 @@ def Sumitomo_scraping():
     return bank_id
 
 
-# 三菱UFJ11/2(selenium)
+# 三菱UFJ銀行
 def UFJ_scraping():
     opt = webdriver.ChromeOptions()
     opt.add_argument('--headless')
@@ -137,7 +137,7 @@ def UFJ_scraping():
     data_name = ['floating', 'fixed_3', 'fixed_20', 'fix_20to25',
                  'fix_25to30', 'fix_30to35']
     data_dict = dict(zip(data_name, r))
-    new_data = bank_dict(data_dict, '三菱UFJ銀行')
+    bank_dict(data_dict, '三菱UFJ銀行')
     bank_id = Bank.objects.get(bank_id=2)
     save_interest(data_dict, bank_id)
     print('保存完了', data_dict)
@@ -171,7 +171,7 @@ def Risona_interest():
     return bank_id
 
 
-# みずほ
+# みずほ銀行
 def Mizuho_scraping():
     opt = webdriver.ChromeOptions()
     opt.add_argument('--headless')
@@ -199,18 +199,15 @@ def Mizuho_scraping():
     return bank_id
 
 
+# 金利更新のコマンド
 class Command(BaseCommand):
     help = "Update Interest Rate"
 
     def handle(self, *args, **options):
 
-        # 実行時のYYYYMMDDを取得
         date = datetime.date.today().strftime("%Y%m%d")
-
-        # 保存ファイルの相対パス
         file_path = settings.UPDATE_PATH + 'interest_rate_' + date + '.csv'
 
-        # 保存ディレクトリが存在しなければ作成
         os.makedirs(settings.UPDATE_PATH, exist_ok=True)
 
         # 銀行データのセーブ

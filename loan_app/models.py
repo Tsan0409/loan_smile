@@ -10,6 +10,7 @@ class MyAppConfig(AppConfig):
 
 
 class Bank(models.Model):
+
     user_id = models.ForeignKey(
         CustomUser, verbose_name='ユーザー', on_delete=models.CASCADE)
     bank_id = models.AutoField(
@@ -20,13 +21,12 @@ class Bank(models.Model):
     class Meta:
         verbose_name_plural = 'Bank'
 
-        # 1つのユーザー名で同じ名前の銀行は1つ
+        # 1つのuserで同じ名前の銀行は1つ
         constraints = [
             models.UniqueConstraint(
                 fields=["bank_name", "user_id"],
                 name="bank_name_unique"
-            ),
-        ]
+            ), ]
 
     def __str__(self):
         return self.bank_name
@@ -34,7 +34,8 @@ class Bank(models.Model):
 
 class InterestRate(models.Model):
 
-    bank_id = models.OneToOneField(Bank, verbose_name='銀行id', on_delete=models.CASCADE, primary_key=True)
+    bank_id = models.OneToOneField(Bank, verbose_name='銀行id',
+                                   on_delete=models.CASCADE, primary_key=True)
     floating = models.FloatField(verbose_name='変動金利型')
     fixed_1 = models.FloatField(verbose_name='固定金利選択型01年')
     fixed_2 = models.FloatField(verbose_name='固定金利選択型02年')
@@ -74,7 +75,7 @@ class Option(models.Model):
 
     class Meta:
 
-        # 1つのユーザー名で同じ名前の銀行は1つ
+        # 1つのUserで同じ名前の銀行は1つ
         constraints = [
             models.UniqueConstraint(
                 fields=["bank_id", "option_name"],

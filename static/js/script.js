@@ -10,7 +10,6 @@ function remove_chi(parent_id) {
 };
 
 // 祖父要素を隠す
-
 function hidden_par(base_id) {
     document.getElementById(base_id).parentNode.parentNode.classList.add('hidden');
 };
@@ -30,8 +29,7 @@ function no_hidden(id_name) {
 };
 
 
-// require
-
+// require 属性の操作
 function add_required (id_name) {
     const target = document.getElementById(id_name);
     target.required = true;
@@ -42,7 +40,7 @@ function remove_required (id_name) {
     target.required = false;
 }
 
-//min 属性
+//min 属性の操作
 function add_min(id_name){
     console.log('add')
     const target = document.getElementById(id_name);
@@ -56,11 +54,7 @@ function remove_min(id_name) {
 };
 
 
-
-
-
 // ラジオボタン（のみ）
-
 function on_radio() {
     let id_select = document.getElementById('id_select_0');
     if (id_select.checked) {

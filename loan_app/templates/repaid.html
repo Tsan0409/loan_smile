@@ -4,7 +4,7 @@
 
 {% block contents %}
 
-    <h1 class="content-head">月々の支払い例</h1>
+    <h1 class="content-head">月々の支払い額</h1>
     <p class="contents-ex">必要事項を入力してください</p>
         <form action="" method="post" id="form" class="form">
             {% csrf_token %}
@@ -12,7 +12,7 @@
             <table>
 
                 {% for field in form %}
-                {% if field.label == "返済タイプ" or field.label == "属性"%}
+                {% if field.label == "返済方法" or field.label == "金利の入力方法"%}
                 <tr>
                     <th>
                         {{ field.label }}
@@ -22,7 +22,7 @@
                     </td>
                 </tr>
 
-                {% else %}
+               {% else %}
                 <tr>
                     <th>
                         {{ field.label }}
@@ -35,7 +35,7 @@
                 {% endfor %}
                 <tr>
                     <th>
-                        金利情報
+                        金利
                     </th>
                     <td class="form-text">
                         <select name="bank_rate" class="form-text" id="id_bank_rate" required>
@@ -65,7 +65,7 @@
                     <td><span  class="answer_main">{{ borrow }}</span>円</td>
                 </tr>
                 <tr>
-                    <th>月々の支払い</th>
+                    <th>月々の支払い額</th>
                     <td><span  class="answer_main">{{ amount_repaid }}</span>円</td>
                 </tr>
                 <tr>
@@ -93,7 +93,7 @@
                 <tr>
                     <td  class="table-data">{{ value.0 }}</td>
                     <td data-label="毎月の返済額" class="table-data">{{ value.1 }}円</td>
-                    <td data-label="利息" class="table-data">{{ value.2}}円</td>
+                    <td data-label="利息部分" class="table-data">{{ value.2}}円</td>
                     <td data-label="元本部分" class="table-data">{{ value.3}}円</td>
                     <td data-label="借入残高" class="table-data">{{ value.4}}円</td>
                 </tr>

@@ -4,6 +4,7 @@ from math import floor, ceil
 import pandas as pd
 import datetime
 import os
+from decimal import Decimal
 
 
 # カンマで区切る
@@ -49,7 +50,7 @@ def cal_interest(borrowed, total_repaid):
 
 
 # 月々の支払い(元金均等返済)
-def P_paid(borrow, interest_rate, year):
+def p_paid(borrow, interest_rate, year):
     df = {}
     interest_month = interest_rate / 12 / 100
     times = year * 12
@@ -67,7 +68,7 @@ def P_paid(borrow, interest_rate, year):
 
 
 # 月々の再払い(元利均等返済)
-def PI_paid(borrow, interest_rate, year):
+def pi_paid(borrow, interest_rate, year):
     df = {}
     times = year * 12
     principal = floor(borrow / times)
@@ -84,35 +85,33 @@ def PI_paid(borrow, interest_rate, year):
     return df
 
 
+# csvのpathを作成(元金均等返済)
 def csv_pdata_path():
     dt = str(datetime.datetime.now())
     file_path = settings.PDATA_PATH + 'p_data_' + dt + '.csv'
     os.makedirs(settings.PDATA_PATH, exist_ok=True)
-
     files = os.listdir(settings.PDATA_PATH)
     if len(files) >= settings.NUM_SAVED_PDATA:
         files.sort()
         os.remove(settings.PDATA_PATH + files[0])
-
     return file_path
 
 
+# csvのpathを作成(元利均等編歳)
 def csv_pidata_path():
     dt = str(datetime.datetime.now())
     file_path = settings.PIDATA_PATH + 'pi_data_' + dt + '.csv'
     os.makedirs(settings.PIDATA_PATH, exist_ok=True)
-
     files = os.listdir(settings.PIDATA_PATH)
     if len(files) >= settings.NUM_SAVED_PIDATA:
         files.sort()
         os.remove(settings.PIDATA_PATH + files[0])
-
     return file_path
 
 
 # CSV作成(元利均等返済)
-def create_PIcsv(borrow, interest, year, csv_path):
-    paid = PI_paid(borrow, interest, year)
+def create_pi_csv(borrow, interest, year, csv_path):
+    paid = pi_paid(borrow, interest, year)
     month = []
     interest_list = []
     principal_list = []
@@ -129,8 +128,8 @@ def create_PIcsv(borrow, interest, year, csv_path):
 
 
 # CSV作成(元金均等返済)
-def create_Pcsv(borrow, interest, year, csv_path):
-    paid = P_paid(borrow, interest, year)
+def create_p_csv(borrow, interest, year, csv_path):
+    paid = p_paid(borrow, interest, year)
     month = []
     interest_list = []
     principal_list = []
@@ -153,7 +152,7 @@ def total_repaid(repaid, year):
 
 
 # 返済総額(元利均等返済)
-def total_PIrepaid(interest_rate, borrowed, year):
+def total_pi_repaid(interest_rate, borrowed, year):
     times = year * 12
     principal = floor(borrowed / times)
     interest_m = interest_rate / 12 / 100
@@ -185,6 +184,7 @@ def create_bank_dict(json_encode):
     return bank_info
 
 
+# オプションデータを辞書型に変更
 def create_option_dict(json_encode):
     bank_option = []
     for i in json_encode:
@@ -194,3 +194,48 @@ def create_option_dict(json_encode):
         }
         bank_option.append(bank_data)
     return bank_option
+
+
+# csvの読み込み
+def read(csv, year):
+    df = pd.read_csv(csv)
+    li = ["1", '13', '25', '49', '109', '228', '349', '409']
+    years = [' 1年目', '  2年目', ' 3年目', ' 5年目', '10年目', '20年目', '30年目',
+             '35年目']
+    contents = {}
+    if year == 35:
+        count = 7
+    elif year >= 30:
+        count = 6
+    elif year >= 20:
+        count = 5
+    elif year >= 10:
+        count = 4
+    elif year >= 5:
+        count = 3
+    elif year >= 2:
+        count = 2
+    elif year >= 1:
+        count = 1
+    else:
+        count = 0
+    for n in range(count + 1):
+        ind = [years[n]]
+        for i in range(4):
+            ind.append(str(com(df.iloc[i][li[n]])))
+        contents[n] = ind
+    return contents
+
+
+# 金利のタイプで返す値を変える
+def select_interest(select, data):
+    if select == '0':
+        interest_rate = float(Decimal(data['interest']))
+        option_rate = 0
+        sum_rate = interest_rate
+    else:
+        interest_rate = Decimal(data['bank_rate'])
+        option_rate = Decimal(data['bank_option'])
+        sum_rate = float(interest_rate + option_rate)
+    rates = [interest_rate, option_rate, sum_rate]
+    return rates

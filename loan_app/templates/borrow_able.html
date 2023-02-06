@@ -16,7 +16,7 @@
             <table>
 
                 {% for field in form %}
-                {% if field.label == "返済タイプ" or field.label == "属性"%}
+                {% if field.label == "返済方法" or field.label == "金利の入力方法"%}
                 <tr>
                     <th>
                         {{ field.label }}
@@ -38,7 +38,7 @@
                 {% endfor %}
                 <tr>
                     <th>
-                        金利情報
+                        金利
                     </th>
                     <td class="form-text">
                         <select name="bank_rate" class="form-text" id="id_bank_rate" required>

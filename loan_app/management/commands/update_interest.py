@@ -1,7 +1,9 @@
 from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
 from django.conf import settings
+
 from loan_app.models import Bank, InterestRate
-from loan_smile.settings_common import DRIVER
+from loan_smile.settings_common import ADMIN_NAME, DRIVER
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,8 +19,7 @@ def source(url):
     load_url = url
     html = requests.get(load_url)
     time.sleep(3)
-    soup = BeautifulSoup(html.content, "html.parser",
-                         from_encoding='utf-8')
+    soup = BeautifulSoup(html.content, "html.parser", from_encoding='utf-8')
     return soup
 
 
@@ -39,12 +40,10 @@ def arrange(soup, tag, lst):
 # 銀行データの型枠
 def bank_dict(di, bank_name):
     b_dict = {'bank_name': f'{bank_name}', 'floating': 0, 'fixed_1': 0,
-              'fixed_2': 0,
-              'fixed_3': 0, 'fixed_5': 0,
+              'fixed_2': 0, 'fixed_3': 0, 'fixed_5': 0,
               'fixed_7': 0, 'fixed_10': 0, 'fixed_15': 0, 'fixed_20': 0,
               'fixed_30': 0, 'fix_10to15': 0, 'fix_15to20': 0,
-              'fix_20to25': 0,
-              'fix_25to30': 0, 'fix_30to35': 0
+              'fix_20to25': 0, 'fix_25to30': 0, 'fix_30to35': 0
               }
     for i in di:
         b_dict[i] = di[i]
@@ -55,12 +54,10 @@ def bank_dict(di, bank_name):
 # 銀行データの保存
 def save_interest(di, bank_id):
     b_dict = {'bank_id': bank_id, 'floating': 0, 'fixed_1': 0,
-              'fixed_2': 0,
-              'fixed_3': 0, 'fixed_5': 0,
+              'fixed_2': 0, 'fixed_3': 0, 'fixed_5': 0,
               'fixed_7': 0, 'fixed_10': 0, 'fixed_15': 0, 'fixed_20': 0,
               'fixed_30': 0, 'fix_10to15': 0, 'fix_15to20': 0,
-              'fix_20to25': 0,
-              'fix_25to30': 0, 'fix_30to35': 0
+              'fix_20to25': 0, 'fix_25to30': 0, 'fix_30to35': 0
               }
     for i in di:
         b_dict[i] = float(di[i])
@@ -87,7 +84,7 @@ def save_interest(di, bank_id):
 
 
 # 三井住友銀行
-def Sumitomo_scraping():
+def Sumitomo_scraping(user_id):
     opt = webdriver.ChromeOptions()
     opt.add_argument('--headless')
     driver = webdriver.Chrome(executable_path=DRIVER, options=opt)
@@ -109,14 +106,15 @@ def Sumitomo_scraping():
                  'fixed_10', 'fix_10to15', 'fix_15to20',
                  'fix_20to25', 'fix_25to30', 'fix_30to35']
     data_dict = dict(zip(data_name, r))
-    bank_id = Bank.objects.get(bank_id=1)
+    bank_id = Bank.objects.get(bank_name='三井住友銀行', user_id_id=user_id.id)
+    print(bank_id)
     save_interest(data_dict, bank_id)
     print('保存完了', data_dict)
     return bank_id
 
 
 # 三菱UFJ銀行
-def UFJ_scraping():
+def UFJ_scraping(user_id):
     opt = webdriver.ChromeOptions()
     opt.add_argument('--headless')
     driver = webdriver.Chrome(executable_path=DRIVER, options=opt)
@@ -138,14 +136,14 @@ def UFJ_scraping():
                  'fix_25to30', 'fix_30to35']
     data_dict = dict(zip(data_name, r))
     bank_dict(data_dict, '三菱UFJ銀行')
-    bank_id = Bank.objects.get(bank_id=2)
+    bank_id = Bank.objects.get(bank_name='三菱UFJ銀行', user_id_id=user_id.id)
     save_interest(data_dict, bank_id)
     print('保存完了', data_dict)
     return bank_id
 
 
 # りそな銀行
-def Risona_interest():
+def Risona_interest(user_id):
     i = []
     soup = source('https://www.resonabank.co.jp/kojin/loan_viewer.html')
     time.sleep(3)
@@ -165,14 +163,14 @@ def Risona_interest():
                  'fix_15to20',
                  'fix_20to25', 'fix_25to30', 'fix_30to35', ]
     data_dict = dict(zip(data_name, new_i))
-    bank_id = Bank.objects.get(bank_id=3)
+    bank_id = Bank.objects.get(bank_name='りそな銀行', user_id_id=user_id.id)
     save_interest(data_dict, bank_id)
     print('保存完了', data_dict)
     return bank_id
 
 
 # みずほ銀行
-def Mizuho_scraping():
+def Mizuho_scraping(user_id):
     opt = webdriver.ChromeOptions()
     opt.add_argument('--headless')
     driver = webdriver.Chrome(executable_path=DRIVER, options=opt)
@@ -190,10 +188,9 @@ def Mizuho_scraping():
     r = r[1::2]
     data_name = ['floating', 'fixed_2', 'fixed_3', 'fixed_5', 'fixed_7',
                  'fixed_10', 'fixed_15', 'fixed_20', 'fix_10to15',
-                 'fix_15to20',
-                 'fix_20to25', 'fix_25to30', 'fix_30to35']
+                 'fix_15to20', 'fix_20to25', 'fix_25to30', 'fix_30to35']
     data_dict = dict(zip(data_name, r))
-    bank_id = Bank.objects.get(bank_id=4)
+    bank_id = Bank.objects.get(bank_name='みずほ銀行', user_id_id=user_id.id)
     save_interest(data_dict, bank_id)
     print('保存完了', data_dict)
     return bank_id
@@ -205,16 +202,39 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        username = ADMIN_NAME
+
+        # 管理ユーザの存在を確認
+        exits = get_user_model().objects.filter(username=username).exists()
+        if exits:
+            admin_data = get_user_model().objects.get(username=username)
+        else:
+            return
+
+        # 銀行データの確認
+        sumitomo_id = Bank.objects.filter(user_id=admin_data, bank_name='三井住友銀行').exists()
+        if not sumitomo_id:
+            Bank.objects.create(user_id=admin_data, bank_name='三井住友銀行')
+        UFJ_id = Bank.objects.filter(user_id=admin_data, bank_name='三菱UFJ銀行').exists()
+        if not UFJ_id:
+            Bank.objects.create(user_id=admin_data, bank_name='三菱UFJ銀行')
+        Risona_id = Bank.objects.filter(user_id=admin_data, bank_name='りそな銀行').exists()
+        if not Risona_id:
+            Bank.objects.create(user_id=admin_data, bank_name='りそな銀行')
+        Mizuho_id = Bank.objects.filter(user_id=admin_data, bank_name='みずほ銀行').exists()
+        if not Mizuho_id:
+            Bank.objects.create(user_id=admin_data, bank_name='みずほ銀行')
+
         date = datetime.date.today().strftime("%Y%m%d")
         file_path = settings.UPDATE_PATH + 'interest_rate_' + date + '.csv'
 
         os.makedirs(settings.UPDATE_PATH, exist_ok=True)
 
         # 銀行データのセーブ
-        Sumitomo_rate = Sumitomo_scraping()
-        UFJ_rate = UFJ_scraping()
-        Risona_rate = Risona_interest()
-        Mizuho_rate = Mizuho_scraping()
+        Sumitomo_rate = Sumitomo_scraping(admin_data)
+        UFJ_rate = UFJ_scraping(admin_data)
+        Risona_rate = Risona_interest(admin_data)
+        Mizuho_rate = Mizuho_scraping(admin_data)
 
         banks = [Sumitomo_rate, UFJ_rate, Risona_rate, Mizuho_rate]
 

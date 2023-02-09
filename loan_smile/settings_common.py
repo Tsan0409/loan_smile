@@ -189,3 +189,8 @@ NUM_SAVED_PIDATA = 50
 
 # selenium driver
 DRIVER = os.environ.get('DRIVER')
+
+# 管理ユーザー
+ADMIN_NAME = os.environ.get('ADMIN_NAME')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+ADMIN_PASS = os.environ.get('ADMIN_PASS')

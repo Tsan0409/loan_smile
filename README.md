@@ -21,7 +21,7 @@ https://loansmilehome.com/
 - Nginx
 - Gunicorn
 - AWS
-  - EC"
+  - EC2
   - Amazon SES
  
 ## 実装した機能
